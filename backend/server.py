@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-from emergentintegrations.llm.openai import LlmChat
+from emergentintegrations.llm.openai import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -19,8 +19,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# LLM Chat client with Emergent key
-llm_client = LlmChat(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+# Get Emergent LLM Key
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
 # Create the main app
 app = FastAPI()
@@ -186,11 +186,16 @@ async def generate_content(request: GenerateRequest):
     }
     
     try:
-        generated_text = await llm_client.chat(
-            model="gpt-4o-mini",
-            system_prompt="You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure.",
-            user_prompt=prompts[request.content_type]
+        # Create a new LlmChat instance for each request
+        llm_client = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=str(uuid.uuid4()),
+            system_message="You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."
         )
+        llm_client = llm_client.with_model("gpt-4o-mini")
+        
+        user_msg = UserMessage(text=prompts[request.content_type])
+        generated_text = await llm_client.send_message(user_msg)
     except Exception as e:
         logging.error(f"AI generation error: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate content. Please try again.")
