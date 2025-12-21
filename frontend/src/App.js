@@ -30,7 +30,10 @@ import {
   CheckCircle,
   Loader2,
   ArrowRight,
-  Star
+  Star,
+  Palette,
+  Layers,
+  Monitor
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -42,7 +45,9 @@ const iconMap = {
   ShoppingBag: ShoppingBag,
   Mail: Mail,
   Megaphone: Megaphone,
-  Layout: Layout
+  Layout: Layout,
+  Palette: Palette,
+  Layers: Layers
 };
 
 const toneOptions = [
