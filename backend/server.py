@@ -115,7 +115,7 @@ class PurchaseCreditsRequest(BaseModel):
 # API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "AI Content Studio API"}
+    return {"message": "Champion AI Studio API"}
 
 @api_router.get("/content-types")
 async def get_content_types():
