@@ -28,6 +28,12 @@ db = client[os.environ['DB_NAME']]
 # Get Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
+# PayPal Configuration
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET')
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'sandbox')
+PAYPAL_BASE_URL = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+
 # Admin credentials (you can change this password)
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'ChampionAdmin2025!')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
