@@ -213,6 +213,8 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [generatedContent, setGeneratedContent] = useState("");
   const [history, setHistory] = useState([]);
   const [showPricing, setShowPricing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [viewMode, setViewMode] = useState("code"); // "code" or "preview"
 
   const fetchContentTypes = useCallback(async () => {
     try {
@@ -246,6 +248,24 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     fetchContentTypes();
     fetchHistory();
   }, [fetchContentTypes, fetchHistory]);
+
+  // Extract code from generated content
+  const extractCode = (content) => {
+    // Try to extract code from markdown code blocks
+    const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
+    const matches = [...content.matchAll(codeBlockRegex)];
+    if (matches.length > 0) {
+      return matches.map(m => m[1].trim()).join('\n\n');
+    }
+    // If no code blocks, check if it looks like code
+    if (content.includes('import ') || content.includes('function ') || content.includes('const ')) {
+      return content;
+    }
+    return null;
+  };
+
+  // Check if content type is code-based
+  const isCodeType = selectedType === "web_app_design" || selectedType === "wireframe";
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
