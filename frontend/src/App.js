@@ -98,8 +98,10 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mt-24">
+        <div className="grid md:grid-cols-4 gap-6 mt-24">
           {[
+            { icon: Palette, title: "Web & App Design", desc: "AI-powered UI/UX specifications", highlight: true },
+            { icon: Layers, title: "Wireframes & Flows", desc: "App structure and user journeys", highlight: true },
             { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles that rank" },
             { icon: Share2, title: "Social Media", desc: "Viral-worthy posts for any platform" },
             { icon: Mail, title: "Email Copy", desc: "Emails that get opened and clicked" },
@@ -107,10 +109,13 @@ const LandingPage = ({ onGetStarted }) => {
             { icon: ShoppingBag, title: "Product Descriptions", desc: "Compelling copy that sells" },
             { icon: Layout, title: "Landing Pages", desc: "Conversion-focused web copy" }
           ].map((feature, i) => (
-            <Card key={i} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all">
+            <Card key={i} className={`${feature.highlight ? 'bg-purple-500/20 border-purple-500/50 hover:bg-purple-500/30' : 'bg-white/5 border-white/10 hover:bg-white/10'} transition-all`}>
               <CardHeader>
-                <feature.icon className="h-10 w-10 text-purple-400 mb-2" />
-                <CardTitle className="text-white">{feature.title}</CardTitle>
+                <feature.icon className={`h-10 w-10 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
+                <CardTitle className="text-white flex items-center gap-2">
+                  {feature.title}
+                  {feature.highlight && <Badge className="bg-purple-500 text-xs">NEW</Badge>}
+                </CardTitle>
                 <CardDescription className="text-gray-400">{feature.desc}</CardDescription>
               </CardHeader>
             </Card>
