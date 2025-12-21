@@ -863,7 +863,7 @@ async def admin_login(request: AdminLoginRequest):
     """Admin login with username and password - returns auth token"""
     if request.username == ADMIN_USERNAME and request.password == ADMIN_PASSWORD:
         # Generate a secure token
-        token = str(uuid4()) + "-" + str(uuid4())
+        token = str(uuid.uuid4()) + "-" + str(uuid.uuid4())
         expires = datetime.now(timezone.utc) + timedelta(hours=24)
         ADMIN_TOKENS[token] = {
             'username': request.username,
