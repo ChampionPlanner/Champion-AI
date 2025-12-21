@@ -68,14 +68,14 @@ CONTENT_TYPES = {
     },
     "web_app_design": {
         "name": "Web & App Design",
-        "description": "AI-powered UI/UX design specs",
+        "description": "Generate React + Tailwind code",
         "credits": 3,
         "icon": "Palette"
     },
     "wireframe": {
-        "name": "Wireframe & Flow",
-        "description": "App structure and user flows",
-        "credits": 2,
+        "name": "Full App Code",
+        "description": "Complete multi-page app structure",
+        "credits": 4,
         "icon": "Layers"
     }
 }
