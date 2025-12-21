@@ -543,7 +543,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           {brandVoices.map((voice) => (
                             <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
                           ))}
