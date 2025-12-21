@@ -292,9 +292,13 @@ async def create_user(input: UserCreate):
     if existing:
         if isinstance(existing.get('created_at'), str):
             existing['created_at'] = datetime.fromisoformat(existing['created_at'])
+        # Ensure referral_code exists for old users
+        if not existing.get('referral_code'):
+            existing['referral_code'] = secrets.token_urlsafe(8)
         return User(**existing)
     
-    user_data = input.model_dump()
+    # Only pass email and name to User, let defaults handle the rest
+    user_data = {"email": input.email, "name": input.name}
     
     # Handle referral
     bonus_credits = 0
