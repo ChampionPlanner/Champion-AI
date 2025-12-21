@@ -608,6 +608,75 @@ const Dashboard = ({ user, setUser, onLogout }) => {
           </p>
         </DialogContent>
       </Dialog>
+
+      {/* Live Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-6xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-white text-xl flex items-center gap-2">
+              <Eye className="h-5 w-5 text-purple-400" /> Live Preview
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              See your generated component in action
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 h-full min-h-0 mt-4">
+            {generatedContent && extractCode(generatedContent) && (
+              <Sandpack
+                template="react"
+                theme="dark"
+                options={{
+                  showNavigator: false,
+                  showTabs: true,
+                  showLineNumbers: true,
+                  editorHeight: "100%",
+                  externalResources: [
+                    "https://cdn.tailwindcss.com"
+                  ]
+                }}
+                customSetup={{
+                  dependencies: {
+                    "lucide-react": "latest"
+                  }
+                }}
+                files={{
+                  "/App.js": {
+                    code: `${extractCode(generatedContent)}
+
+// Render the component
+export default function App() {
+  // Try to find and render the main component
+  const Component = typeof PricingPage !== 'undefined' ? PricingPage 
+    : typeof Dashboard !== 'undefined' ? Dashboard
+    : typeof HomePage !== 'undefined' ? HomePage
+    : typeof LandingPage !== 'undefined' ? LandingPage
+    : typeof MainComponent !== 'undefined' ? MainComponent
+    : typeof Card !== 'undefined' ? Card
+    : typeof Hero !== 'undefined' ? Hero
+    : () => <div className="p-8 text-center text-gray-500">Component preview</div>;
+  
+  return <Component />;
+}`,
+                    active: true
+                  },
+                  "/index.html": {
+                    code: `<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>`,
+                    hidden: true
+                  }
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
