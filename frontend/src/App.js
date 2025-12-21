@@ -14,29 +14,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { 
-  Sparkles, 
-  FileText, 
-  Share2, 
-  ShoppingBag, 
-  Mail, 
-  Megaphone, 
-  Layout,
-  Zap,
-  Copy,
-  History,
-  CreditCard,
-  User,
-  LogOut,
-  CheckCircle,
-  Loader2,
-  ArrowRight,
-  Star,
-  Palette,
-  Layers,
-  Monitor,
-  Eye,
-  Code,
-  X
+  Sparkles, FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Zap, Copy, History,
+  CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
+  Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
+  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
@@ -44,14 +25,8 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const iconMap = {
-  FileText: FileText,
-  Share2: Share2,
-  ShoppingBag: ShoppingBag,
-  Mail: Mail,
-  Megaphone: Megaphone,
-  Layout: Layout,
-  Palette: Palette,
-  Layers: Layers
+  FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Palette, Layers, Image, RefreshCw,
+  Home, Dumbbell, Laptop, ShoppingCart, Briefcase
 };
 
 const toneOptions = [
@@ -64,10 +39,9 @@ const toneOptions = [
 ];
 
 // Landing Page Component
-const LandingPage = ({ onGetStarted }) => {
+const LandingPage = ({ onGetStarted, referralCode }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <nav className="flex justify-between items-center mb-16">
           <div className="flex items-center gap-2">
@@ -81,44 +55,44 @@ const LandingPage = ({ onGetStarted }) => {
 
         <div className="text-center max-w-4xl mx-auto">
           <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/30">
-            <Zap className="h-3 w-3 mr-1" /> AI-Powered Content Generation
+            <Zap className="h-3 w-3 mr-1" /> AI-Powered Content & Code Generation
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Create Stunning Content
+            Create Content & Code
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"> in Seconds</span>
           </h1>
           <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-            Generate blog posts, social media content, emails, ad copy, and more with the power of AI. Save hours of writing time and boost your marketing.
+            Generate blog posts, social media, emails, AI images, React code, and more. 
+            Support for 20+ languages. Repurpose content instantly.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={onGetStarted} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg px-8 py-6" data-testid="hero-get-started-btn">
               Start Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 text-lg px-8 py-6">
-              See Examples
-            </Button>
           </div>
-          <p className="text-gray-400 mt-4">3 free credits to start • No credit card required</p>
+          <p className="text-gray-400 mt-4">
+            {referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "3 free credits to start • No credit card required"}
+          </p>
         </div>
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-4 gap-6 mt-24">
           {[
-            { icon: Palette, title: "Component Code", desc: "React + Tailwind components", highlight: true },
-            { icon: Layers, title: "Full App Code", desc: "Complete multi-page apps", highlight: true },
-            { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles that rank" },
-            { icon: Share2, title: "Social Media", desc: "Viral-worthy posts for any platform" },
-            { icon: Mail, title: "Email Copy", desc: "Emails that get opened and clicked" },
-            { icon: Megaphone, title: "Ad Copy", desc: "High-converting advertisements" },
-            { icon: ShoppingBag, title: "Product Descriptions", desc: "Compelling copy that sells" },
-            { icon: Layout, title: "Landing Pages", desc: "Conversion-focused web copy" }
+            { icon: Image, title: "AI Images", desc: "Generate custom images", highlight: true, badge: "NEW" },
+            { icon: RefreshCw, title: "Repurpose", desc: "1 piece → 10+ formats", highlight: true, badge: "NEW" },
+            { icon: Globe, title: "20+ Languages", desc: "Global content creation", highlight: true, badge: "NEW" },
+            { icon: Palette, title: "React Code", desc: "Components with preview", highlight: true, badge: "CODE" },
+            { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles" },
+            { icon: Share2, title: "Social Media", desc: "Viral-worthy posts" },
+            { icon: Mail, title: "Email Copy", desc: "Emails that convert" },
+            { icon: Megaphone, title: "Ad Copy", desc: "High-converting ads" }
           ].map((feature, i) => (
-            <Card key={i} className={`${feature.highlight ? 'bg-purple-500/20 border-purple-500/50 hover:bg-purple-500/30' : 'bg-white/5 border-white/10 hover:bg-white/10'} transition-all`}>
+            <Card key={i} className={`${feature.highlight ? 'bg-purple-500/20 border-purple-500/50' : 'bg-white/5 border-white/10'} hover:bg-white/10 transition-all`}>
               <CardHeader>
                 <feature.icon className={`h-10 w-10 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
                 <CardTitle className="text-white flex items-center gap-2">
                   {feature.title}
-                  {feature.highlight && <Badge className="bg-purple-500 text-xs">CODE</Badge>}
+                  {feature.badge && <Badge className="bg-purple-500 text-xs">{feature.badge}</Badge>}
                 </CardTitle>
                 <CardDescription className="text-gray-400">{feature.desc}</CardDescription>
               </CardHeader>
@@ -126,24 +100,42 @@ const LandingPage = ({ onGetStarted }) => {
           ))}
         </div>
 
-        {/* Pricing Section */}
+        {/* New Features Section */}
+        <div className="mt-24 text-center">
+          <h2 className="text-3xl font-bold text-white mb-12">Powerful Features</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
+              <Users className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Brand Voices</h3>
+              <p className="text-gray-400">Save your brand's tone and style for consistent content</p>
+            </div>
+            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
+              <Briefcase className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Templates</h3>
+              <p className="text-gray-400">Industry-specific templates for faster creation</p>
+            </div>
+            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
+              <Key className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">API Access</h3>
+              <p className="text-gray-400">Integrate our AI into your own applications</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing */}
         <div className="mt-32">
-          <h2 className="text-4xl font-bold text-white text-center mb-4">Simple, Transparent Pricing</h2>
+          <h2 className="text-4xl font-bold text-white text-center mb-4">Simple Pricing</h2>
           <p className="text-gray-400 text-center mb-12">Choose the plan that works for you</p>
           
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
-              { name: "Free Trial", price: "$0", credits: "3", features: ["3 generations", "All content types", "Basic support"] },
-              { name: "Starter", price: "$9", credits: "50", features: ["50 credits", "All content types", "Priority support"], popular: false },
-              { name: "Pro", price: "$29", credits: "200", features: ["200 credits", "All content types", "Premium support", "History access"], popular: true },
-              { name: "Unlimited", price: "$49/mo", credits: "∞", features: ["Unlimited generations", "All content types", "VIP support", "API access"] }
+              { name: "Free", price: "$0", credits: "3", features: ["All content types", "20+ languages", "Basic support"] },
+              { name: "Starter", price: "$9", credits: "50", features: ["Everything in Free", "Brand voices", "Templates"] },
+              { name: "Pro", price: "$29", credits: "200", features: ["Everything in Starter", "Bulk generation", "API access"], popular: true },
+              { name: "Unlimited", price: "$49/mo", credits: "∞", features: ["Everything in Pro", "Priority support", "Custom templates"] }
             ].map((plan, i) => (
               <Card key={i} className={`relative ${plan.popular ? 'border-purple-500 bg-purple-500/10' : 'bg-white/5 border-white/10'}`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500">
-                    <Star className="h-3 w-3 mr-1" /> Most Popular
-                  </Badge>
-                )}
+                {plan.popular && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500"><Star className="h-3 w-3 mr-1" /> Popular</Badge>}
                 <CardHeader className="text-center">
                   <CardTitle className="text-white">{plan.name}</CardTitle>
                   <div className="text-4xl font-bold text-white mt-2">{plan.price}</div>
@@ -152,20 +144,15 @@ const LandingPage = ({ onGetStarted }) => {
                 <CardContent>
                   <ul className="space-y-2">
                     {plan.features.map((f, j) => (
-                      <li key={j} className="flex items-center text-gray-300">
-                        <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                      <li key={j} className="flex items-center text-gray-300 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
                         {f}
                       </li>
                     ))}
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    className={`w-full ${plan.popular ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
-                    variant={plan.popular ? 'default' : 'outline'}
-                    onClick={onGetStarted}
-                    data-testid={`pricing-${plan.name.toLowerCase().replace(' ', '-')}-btn`}
-                  >
+                  <Button className={`w-full ${plan.popular ? 'bg-purple-500 hover:bg-purple-600' : ''}`} variant={plan.popular ? 'default' : 'outline'} onClick={onGetStarted}>
                     Get Started
                   </Button>
                 </CardFooter>
@@ -183,17 +170,12 @@ const LandingPage = ({ onGetStarted }) => {
                 <span className="text-xl font-bold text-white">Champion AI Studio</span>
               </div>
               <div className="flex gap-6 text-gray-400">
-                <a href="https://championaistudio.com" className="hover:text-purple-400 transition-colors">Home</a>
-                <a href="https://championaistudio.com/#pricing" className="hover:text-purple-400 transition-colors">Pricing</a>
-                <a href="mailto:support@championaistudio.com" className="hover:text-purple-400 transition-colors">Support</a>
+                <a href="https://championaistudio.com" className="hover:text-purple-400">Home</a>
+                <a href="mailto:support@championaistudio.com" className="hover:text-purple-400">Support</a>
               </div>
             </div>
             <div className="text-center text-gray-500 text-sm">
               <p>© 2025 Champion AI Studio. All rights reserved.</p>
-              <p className="mt-2">
-                <a href="https://championaistudio.com" className="text-purple-400 hover:text-purple-300">championaistudio.com</a>
-                {" "} — Generate revenue with AI-powered content.
-              </p>
             </div>
           </div>
         </footer>
@@ -205,31 +187,53 @@ const LandingPage = ({ onGetStarted }) => {
 // Dashboard Component
 const Dashboard = ({ user, setUser, onLogout }) => {
   const [contentTypes, setContentTypes] = useState({});
-  const [selectedType, setSelectedType] = useState("");
+  const [languages, setLanguages] = useState({});
+  const [templates, setTemplates] = useState({});
+  const [selectedType, setSelectedType] = useState("blog_post");
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState("professional");
+  const [language, setLanguage] = useState("en");
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
+  const [generatedImage, setGeneratedImage] = useState("");
   const [history, setHistory] = useState([]);
   const [showPricing, setShowPricing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [viewMode, setViewMode] = useState("code"); // "code" or "preview"
+  const [showReferral, setShowReferral] = useState(false);
+  const [showBrandVoice, setShowBrandVoice] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
+  const [showRepurpose, setShowRepurpose] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [referralInfo, setReferralInfo] = useState(null);
+  const [brandVoices, setBrandVoices] = useState([]);
+  const [selectedBrandVoice, setSelectedBrandVoice] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [bulkTopics, setBulkTopics] = useState("");
+  const [repurposeContent, setRepurposeContent] = useState("");
+  const [repurposeFormats, setRepurposeFormats] = useState(["social_media", "email"]);
+  const [apiKey, setApiKey] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageStyle, setImageStyle] = useState("realistic");
+  const [activeTab, setActiveTab] = useState("generate");
 
-  const fetchContentTypes = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/content-types`);
-      setContentTypes(res.data);
-      setSelectedType(Object.keys(res.data)[0]);
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  const fetchHistory = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/generations/${user.id}`);
-      setHistory(res.data);
+      const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes] = await Promise.all([
+        axios.get(`${API}/content-types`),
+        axios.get(`${API}/languages`),
+        axios.get(`${API}/templates`),
+        axios.get(`${API}/generations/${user.id}`),
+        axios.get(`${API}/users/${user.id}/brand-voices`),
+        axios.get(`${API}/referral/${user.id}`)
+      ]);
+      setContentTypes(typesRes.data);
+      setLanguages(langsRes.data);
+      setTemplates(templatesRes.data);
+      setHistory(historyRes.data);
+      setBrandVoices(voicesRes.data);
+      setReferralInfo(referralRes.data);
     } catch (e) {
       console.error(e);
     }
@@ -245,27 +249,8 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   }, [user.id, setUser]);
 
   useEffect(() => {
-    fetchContentTypes();
-    fetchHistory();
-  }, [fetchContentTypes, fetchHistory]);
-
-  // Extract code from generated content
-  const extractCode = (content) => {
-    // Try to extract code from markdown code blocks
-    const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
-    const matches = [...content.matchAll(codeBlockRegex)];
-    if (matches.length > 0) {
-      return matches.map(m => m[1].trim()).join('\n\n');
-    }
-    // If no code blocks, check if it looks like code
-    if (content.includes('import ') || content.includes('function ') || content.includes('const ')) {
-      return content;
-    }
-    return null;
-  };
-
-  // Check if content type is code-based
-  const isCodeType = selectedType === "web_app_design" || selectedType === "wireframe";
+    fetchData();
+  }, [fetchData]);
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -275,33 +260,118 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
     const creditsNeeded = contentTypes[selectedType]?.credits || 1;
     if (user.credits < creditsNeeded) {
-      toast.error("Insufficient credits! Please purchase more.");
+      toast.error("Insufficient credits!");
       setShowPricing(true);
       return;
     }
 
     setGenerating(true);
     setGeneratedContent("");
+    setGeneratedImage("");
 
     try {
       const res = await axios.post(`${API}/generate`, {
         user_id: user.id,
         content_type: selectedType,
-        topic: topic,
-        tone: tone,
-        additional_info: additionalInfo
+        topic,
+        tone,
+        language,
+        additional_info: additionalInfo,
+        brand_voice_id: selectedBrandVoice || null,
+        template_id: selectedTemplate || null
       });
       setGeneratedContent(res.data.generated_content);
-      toast.success("Content generated successfully!");
+      toast.success("Content generated!");
       refreshUser();
-      fetchHistory();
+      fetchData();
     } catch (e) {
-      if (e.response?.status === 402) {
-        toast.error("Insufficient credits! Please purchase more.");
-        setShowPricing(true);
-      } else {
-        toast.error("Failed to generate content. Please try again.");
-      }
+      toast.error(e.response?.data?.detail || "Generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleGenerateImage = async () => {
+    if (!imagePrompt.trim()) {
+      toast.error("Please enter an image description");
+      return;
+    }
+
+    if (user.credits < 2) {
+      toast.error("Insufficient credits!");
+      setShowPricing(true);
+      return;
+    }
+
+    setGenerating(true);
+    setGeneratedImage("");
+
+    try {
+      const res = await axios.post(`${API}/generate-image`, {
+        user_id: user.id,
+        prompt: imagePrompt,
+        style: imageStyle
+      });
+      setGeneratedImage(res.data.image_url);
+      toast.success("Image generated!");
+      refreshUser();
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Image generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleBulkGenerate = async () => {
+    const topics = bulkTopics.split("\n").filter(t => t.trim());
+    if (topics.length === 0) {
+      toast.error("Please enter at least one topic");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const res = await axios.post(`${API}/generate-bulk`, {
+        user_id: user.id,
+        content_type: selectedType,
+        topics,
+        tone,
+        language
+      });
+      setGeneratedContent(res.data.content);
+      toast.success(`Generated ${res.data.items_generated} items!`);
+      setShowBulk(false);
+      refreshUser();
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Bulk generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleRepurpose = async () => {
+    if (!repurposeContent.trim()) {
+      toast.error("Please enter content to repurpose");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const res = await axios.post(`${API}/repurpose`, {
+        user_id: user.id,
+        original_content: repurposeContent,
+        output_formats: repurposeFormats,
+        language
+      });
+      setGeneratedContent(res.data.content);
+      toast.success("Content repurposed!");
+      setShowRepurpose(false);
+      refreshUser();
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Repurpose failed");
     } finally {
       setGenerating(false);
     }
@@ -309,23 +379,46 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
   const handlePurchase = async (plan) => {
     try {
-      const res = await axios.post(`${API}/purchase-credits`, {
-        user_id: user.id,
-        plan: plan
-      });
+      const res = await axios.post(`${API}/purchase-credits`, { user_id: user.id, plan });
       toast.success(res.data.message);
       refreshUser();
       setShowPricing(false);
     } catch (e) {
-      toast.error("Purchase failed. Please try again.");
+      toast.error("Purchase failed");
+    }
+  };
+
+  const handleExport = async (format) => {
+    if (!history.length) return;
+    const genId = history[0].id;
+    window.open(`${API}/export/${genId}?format=${format}`, '_blank');
+    toast.success(`Exporting as ${format.toUpperCase()}`);
+  };
+
+  const generateApiKey = async () => {
+    try {
+      const res = await axios.post(`${API}/users/${user.id}/api-key`);
+      setApiKey(res.data.api_key);
+      toast.success("API key generated!");
+    } catch (e) {
+      toast.error("Failed to generate API key");
     }
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard!");
+    toast.success("Copied!");
   };
 
+  const extractCode = (content) => {
+    const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
+    const matches = [...content.matchAll(codeBlockRegex)];
+    if (matches.length > 0) return matches.map(m => m[1].trim()).join('\n\n');
+    if (content.includes('import ') || content.includes('function ')) return content;
+    return null;
+  };
+
+  const isCodeType = selectedType === "web_app_design" || selectedType === "wireframe";
   const IconComponent = iconMap[contentTypes[selectedType]?.icon] || FileText;
 
   return (
@@ -337,18 +430,24 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <Sparkles className="h-6 w-6 text-purple-400" />
             <span className="text-xl font-bold text-white">Champion AI Studio</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Badge variant="outline" className="border-purple-400 text-purple-400 px-3 py-1" data-testid="credits-badge">
               <Zap className="h-3 w-3 mr-1" /> {user.credits} Credits
             </Badge>
             <Button variant="ghost" size="sm" onClick={() => setShowPricing(true)} className="text-gray-300" data-testid="buy-credits-btn">
-              <CreditCard className="h-4 w-4 mr-2" /> Buy Credits
+              <CreditCard className="h-4 w-4 mr-1" /> Buy
             </Button>
-            <div className="flex items-center gap-2 text-gray-300">
+            <Button variant="ghost" size="sm" onClick={() => setShowReferral(true)} className="text-gray-300">
+              <Gift className="h-4 w-4 mr-1" /> Refer
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowApiKey(true)} className="text-gray-300">
+              <Key className="h-4 w-4 mr-1" /> API
+            </Button>
+            <div className="flex items-center gap-2 text-gray-300 ml-2">
               <User className="h-4 w-4" />
-              <span className="text-sm">{user.name}</span>
+              <span className="text-sm hidden md:inline">{user.name}</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={onLogout} className="text-gray-400 hover:text-white" data-testid="logout-btn">
+            <Button variant="ghost" size="icon" onClick={onLogout} className="text-gray-400">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -356,138 +455,157 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="generate" className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10">
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500" data-testid="tab-generate">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-white/5 border border-white/10 flex-wrap">
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500">
               <Sparkles className="h-4 w-4 mr-2" /> Generate
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500" data-testid="tab-history">
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500">
+              <Image className="h-4 w-4 mr-2" /> AI Image
+            </TabsTrigger>
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500">
+              <RefreshCw className="h-4 w-4 mr-2" /> Repurpose
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500">
               <History className="h-4 w-4 mr-2" /> History
             </TabsTrigger>
           </TabsList>
 
+          {/* Generate Tab */}
           <TabsContent value="generate" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
-              {/* Input Section */}
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <IconComponent className="h-5 w-5 text-purple-400" />
-                    Create Content
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <IconComponent className="h-5 w-5 text-purple-400" /> Create Content
+                    </span>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setShowTemplates(true)} className="text-xs">
+                        <Briefcase className="h-3 w-3 mr-1" /> Templates
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setShowBulk(true)} className="text-xs">
+                        <Plus className="h-3 w-3 mr-1" /> Bulk
+                      </Button>
+                    </div>
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Select content type and describe what you need
-                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Content Type</Label>
-                    <Select value={selectedType} onValueChange={setSelectedType}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="content-type-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(contentTypes).map(([key, value]) => {
-                          const Icon = iconMap[value.icon] || FileText;
-                          return (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Content Type</Label>
+                      <Select value={selectedType} onValueChange={setSelectedType}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(contentTypes).filter(([k]) => k !== 'image' && k !== 'repurpose').map(([key, value]) => (
                             <SelectItem key={key} value={key}>
-                              <div className="flex items-center gap-2">
-                                <Icon className="h-4 w-4" />
-                                {value.name} ({value.credits} credit{value.credits > 1 ? 's' : ''})
-                              </div>
+                              {value.name} ({value.credits} cr)
                             </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Language</Label>
+                      <Select value={language} onValueChange={setLanguage}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(languages).map(([code, name]) => (
+                            <SelectItem key={code} value={code}>{name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Tone</Label>
+                      <Select value={tone} onValueChange={setTone}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {toneOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Brand Voice</Label>
+                      <Select value={selectedBrandVoice} onValueChange={setSelectedBrandVoice}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue placeholder="None" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {brandVoices.map((voice) => (
+                            <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-gray-300">Topic / Subject</Label>
                     <Input
-                      placeholder="e.g., Benefits of remote work for small businesses"
+                      placeholder="e.g., Benefits of remote work for startups"
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
                       className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                      data-testid="topic-input"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Tone</Label>
-                    <Select value={tone} onValueChange={setTone}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="tone-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {toneOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Additional Instructions (Optional)</Label>
+                    <Label className="text-gray-300">Additional Instructions</Label>
                     <Textarea
-                      placeholder="Any specific requirements, keywords to include, target audience..."
+                      placeholder="Any specific requirements..."
                       value={additionalInfo}
                       onChange={(e) => setAdditionalInfo(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[100px]"
-                      data-testid="additional-info-textarea"
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[80px]"
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex gap-2">
                   <Button
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                     onClick={handleGenerate}
                     disabled={generating}
-                    data-testid="generate-btn"
                   >
-                    {generating ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
-                    ) : (
-                      <><Sparkles className="h-4 w-4 mr-2" /> Generate Content ({contentTypes[selectedType]?.credits || 1} credit{(contentTypes[selectedType]?.credits || 1) > 1 ? 's' : ''})</>
-                    )}
+                    {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="h-4 w-4 mr-2" /> Generate</>}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowBrandVoice(true)}>
+                    <Plus className="h-4 w-4" />
                   </Button>
                 </CardFooter>
               </Card>
 
-              {/* Output Section */}
+              {/* Output */}
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center justify-between">
-                    <span>Generated Content</span>
-                    <div className="flex items-center gap-2">
+                    <span>Output</span>
+                    <div className="flex gap-2">
                       {generatedContent && isCodeType && extractCode(generatedContent) && (
-                        <div className="flex bg-white/10 rounded-lg p-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setViewMode("code")}
-                            className={`${viewMode === "code" ? "bg-purple-500 text-white" : "text-gray-400"} px-3 py-1 h-7`}
-                            data-testid="view-code-btn"
-                          >
-                            <Code className="h-3 w-3 mr-1" /> Code
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setShowPreview(true)}
-                            className="text-gray-400 hover:text-white px-3 py-1 h-7"
-                            data-testid="view-preview-btn"
-                          >
-                            <Eye className="h-3 w-3 mr-1" /> Preview
-                          </Button>
-                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => setShowPreview(true)} className="text-purple-400">
+                          <Eye className="h-4 w-4 mr-1" /> Preview
+                        </Button>
                       )}
                       {generatedContent && (
-                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedContent)} className="text-purple-400" data-testid="copy-btn">
-                          <Copy className="h-4 w-4 mr-1" /> Copy
-                        </Button>
+                        <>
+                          <Button variant="ghost" size="sm" onClick={() => handleExport('md')} className="text-gray-400">
+                            <Download className="h-4 w-4 mr-1" /> Export
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedContent)} className="text-purple-400">
+                            <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                        </>
                       )}
                     </div>
                   </CardTitle>
@@ -497,18 +615,16 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                     {generating ? (
                       <div className="flex flex-col items-center justify-center h-full text-gray-400">
                         <Loader2 className="h-8 w-8 animate-spin mb-4" />
-                        <p>Creating your content...</p>
+                        <p>Creating content...</p>
                       </div>
                     ) : generatedContent ? (
-                      <div className="prose prose-invert max-w-none">
-                        <pre className="whitespace-pre-wrap text-gray-300 font-sans text-sm leading-relaxed bg-black/30 p-4 rounded-lg overflow-x-auto">
-                          {generatedContent}
-                        </pre>
-                      </div>
+                      <pre className="whitespace-pre-wrap text-gray-300 text-sm bg-black/30 p-4 rounded-lg">
+                        {generatedContent}
+                      </pre>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-gray-500">
                         <Sparkles className="h-12 w-12 mb-4 opacity-50" />
-                        <p>Your generated content will appear here</p>
+                        <p>Generated content appears here</p>
                       </div>
                     )}
                   </ScrollArea>
@@ -517,49 +633,226 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* AI Image Tab */}
+          <TabsContent value="image" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Image className="h-5 w-5 text-purple-400" /> AI Image Generator
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Generate custom images with AI (2 credits)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Describe your image</Label>
+                    <Textarea
+                      placeholder="A modern office space with natural lighting, minimalist design, plants..."
+                      value={imagePrompt}
+                      onChange={(e) => setImagePrompt(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[120px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Style</Label>
+                    <Select value={imageStyle} onValueChange={setImageStyle}>
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="realistic">Realistic / Photo</SelectItem>
+                        <SelectItem value="illustration">Illustration</SelectItem>
+                        <SelectItem value="3d">3D Render</SelectItem>
+                        <SelectItem value="artistic">Artistic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
+                    onClick={handleGenerateImage}
+                    disabled={generating}
+                  >
+                    {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</> : <><Image className="h-4 w-4 mr-2" /> Generate Image</>}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white">Generated Image</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="aspect-square rounded-lg bg-black/30 flex items-center justify-center overflow-hidden">
+                    {generating ? (
+                      <Loader2 className="h-12 w-12 text-purple-400 animate-spin" />
+                    ) : generatedImage ? (
+                      <img src={generatedImage} alt="Generated" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center text-gray-500">
+                        <Image className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>Your image will appear here</p>
+                      </div>
+                    )}
+                  </div>
+                  {generatedImage && (
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" className="flex-1" onClick={() => window.open(generatedImage, '_blank')}>
+                        <Download className="h-4 w-4 mr-2" /> Download
+                      </Button>
+                      <Button variant="outline" className="flex-1" onClick={() => copyToClipboard(generatedImage)}>
+                        <Copy className="h-4 w-4 mr-2" /> Copy URL
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Repurpose Tab */}
+          <TabsContent value="repurpose" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5 text-purple-400" /> Content Repurposer
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Turn 1 piece of content into multiple formats (3 credits)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Paste your content</Label>
+                    <Textarea
+                      placeholder="Paste your blog post, article, or any content here..."
+                      value={repurposeContent}
+                      onChange={(e) => setRepurposeContent(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[150px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Output Formats</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {["social_media", "email", "ad_copy", "thread", "linkedin", "summary", "quotes"].map((format) => (
+                        <Badge
+                          key={format}
+                          variant={repurposeFormats.includes(format) ? "default" : "outline"}
+                          className={`cursor-pointer ${repurposeFormats.includes(format) ? 'bg-purple-500' : ''}`}
+                          onClick={() => {
+                            if (repurposeFormats.includes(format)) {
+                              setRepurposeFormats(repurposeFormats.filter(f => f !== format));
+                            } else {
+                              setRepurposeFormats([...repurposeFormats, format]);
+                            }
+                          }}
+                        >
+                          {format.replace('_', ' ')}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Output Language</Label>
+                    <Select value={language} onValueChange={setLanguage}>
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(languages).map(([code, name]) => (
+                          <SelectItem key={code} value={code}>{name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
+                    onClick={handleRepurpose}
+                    disabled={generating}
+                  >
+                    {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Repurposing...</> : <><RefreshCw className="h-4 w-4 mr-2" /> Repurpose Content</>}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center justify-between">
+                    Repurposed Content
+                    {generatedContent && (
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedContent)} className="text-purple-400">
+                        <Copy className="h-4 w-4 mr-1" /> Copy All
+                      </Button>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    {generating ? (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                        <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                        <p>Repurposing content...</p>
+                      </div>
+                    ) : generatedContent ? (
+                      <pre className="whitespace-pre-wrap text-gray-300 text-sm bg-black/30 p-4 rounded-lg">
+                        {generatedContent}
+                      </pre>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <RefreshCw className="h-12 w-12 mb-4 opacity-50" />
+                        <p>Repurposed content appears here</p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* History Tab */}
           <TabsContent value="history">
             <Card className="bg-white/5 border-white/10">
               <CardHeader>
                 <CardTitle className="text-white">Generation History</CardTitle>
-                <CardDescription className="text-gray-400">Your previous content generations</CardDescription>
               </CardHeader>
               <CardContent>
                 {history.length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No generations yet. Create your first content!</p>
+                    <p>No generations yet</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {history.map((item) => {
-                      const Icon = iconMap[contentTypes[item.content_type]?.icon] || FileText;
-                      return (
-                        <Card key={item.id} className="bg-white/5 border-white/10">
-                          <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Icon className="h-4 w-4 text-purple-400" />
-                                <CardTitle className="text-white text-base">{item.topic}</CardTitle>
-                              </div>
-                              <Badge variant="outline" className="text-gray-400 border-gray-600">
-                                {contentTypes[item.content_type]?.name || item.content_type}
-                              </Badge>
+                    {history.slice(0, 20).map((item) => (
+                      <Card key={item.id} className="bg-white/5 border-white/10">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-white text-base">{item.topic.slice(0, 50)}...</CardTitle>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-gray-400">{contentTypes[item.content_type]?.name || item.content_type}</Badge>
+                              {item.image_url && <Badge className="bg-purple-500">Image</Badge>}
                             </div>
-                            <CardDescription className="text-gray-500 text-xs">
-                              {new Date(item.created_at).toLocaleString()} • {item.credits_used} credits used
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-gray-400 text-sm line-clamp-3">{item.generated_content}</p>
-                          </CardContent>
-                          <CardFooter>
-                            <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.generated_content)} className="text-purple-400">
-                              <Copy className="h-4 w-4 mr-1" /> Copy Full Content
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      );
-                    })}
+                          </div>
+                          <CardDescription className="text-gray-500 text-xs">
+                            {new Date(item.created_at).toLocaleString()} • {item.credits_used} credits • {languages[item.language] || 'English'}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.topic} className="w-32 h-32 object-cover rounded" />
+                          ) : (
+                            <p className="text-gray-400 text-sm line-clamp-2">{item.generated_content}</p>
+                          )}
+                        </CardContent>
+                        <CardFooter>
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
+                            <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -573,9 +866,6 @@ const Dashboard = ({ user, setUser, onLogout }) => {
         <DialogContent className="bg-slate-900 border-white/10 max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Purchase Credits</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Choose a plan to continue generating amazing content
-            </DialogDescription>
           </DialogHeader>
           <div className="grid md:grid-cols-3 gap-4 mt-4">
             {[
@@ -584,28 +874,194 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               { key: "unlimited", name: "Unlimited", price: "$49/mo", credits: "∞" }
             ].map((plan) => (
               <Card key={plan.key} className={`${plan.popular ? 'border-purple-500 bg-purple-500/10' : 'bg-white/5 border-white/10'}`}>
-                {plan.popular && <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-purple-500">Best Value</Badge>}
                 <CardHeader className="text-center">
                   <CardTitle className="text-white">{plan.name}</CardTitle>
                   <div className="text-3xl font-bold text-white">{plan.price}</div>
                   <CardDescription className="text-purple-400">{plan.credits} credits</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button
-                    className={`w-full ${plan.popular ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
-                    variant={plan.popular ? 'default' : 'outline'}
-                    onClick={() => handlePurchase(plan.key)}
-                    data-testid={`purchase-${plan.key}-btn`}
-                  >
+                  <Button className={`w-full ${plan.popular ? 'bg-purple-500' : ''}`} variant={plan.popular ? 'default' : 'outline'} onClick={() => handlePurchase(plan.key)}>
                     Purchase
                   </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
-          <p className="text-gray-500 text-center text-sm mt-4">
-            Demo mode: Credits are added instantly. In production, integrate with Stripe for real payments.
-          </p>
+        </DialogContent>
+      </Dialog>
+
+      {/* Referral Dialog */}
+      <Dialog open={showReferral} onOpenChange={setShowReferral}>
+        <DialogContent className="bg-slate-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Gift className="text-purple-400" /> Referral Program
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Earn 10 credits for each friend who signs up!</DialogDescription>
+          </DialogHeader>
+          {referralInfo && (
+            <div className="space-y-4 mt-4">
+              <div className="p-4 bg-white/5 rounded-lg">
+                <Label className="text-gray-400 text-sm">Your Referral Link</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input value={referralInfo.referral_link} readOnly className="bg-white/5 border-white/10 text-white" />
+                  <Button onClick={() => copyToClipboard(referralInfo.referral_link)}><Copy className="h-4 w-4" /></Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-white/5 rounded-lg text-center">
+                  <div className="text-3xl font-bold text-purple-400">{referralInfo.total_referrals}</div>
+                  <div className="text-gray-400 text-sm">Friends Referred</div>
+                </div>
+                <div className="p-4 bg-white/5 rounded-lg text-center">
+                  <div className="text-3xl font-bold text-green-400">{referralInfo.credits_earned}</div>
+                  <div className="text-gray-400 text-sm">Credits Earned</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* API Key Dialog */}
+      <Dialog open={showApiKey} onOpenChange={setShowApiKey}>
+        <DialogContent className="bg-slate-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Key className="text-purple-400" /> API Access
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Integrate Champion AI into your applications</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {apiKey || user.api_key ? (
+              <div className="p-4 bg-white/5 rounded-lg">
+                <Label className="text-gray-400 text-sm">Your API Key</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input value={apiKey || user.api_key || ''} readOnly className="bg-white/5 border-white/10 text-white font-mono text-sm" />
+                  <Button onClick={() => copyToClipboard(apiKey || user.api_key)}><Copy className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            ) : (
+              <Button onClick={generateApiKey} className="w-full bg-purple-500">Generate API Key</Button>
+            )}
+            <div className="p-4 bg-white/5 rounded-lg">
+              <Label className="text-gray-400 text-sm">Example Usage</Label>
+              <pre className="text-xs text-gray-300 mt-2 overflow-x-auto">
+{`curl -X POST "${API}/v1/generate" \\
+  -H "Content-Type: application/json" \\
+  -d '{"content_type":"blog_post","topic":"AI"}'&api_key=YOUR_KEY`}
+              </pre>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl">Templates Library</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] mt-4">
+            <div className="space-y-4">
+              {Object.entries(templates).map(([key, category]) => (
+                <div key={key}>
+                  <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
+                    {iconMap[category.icon] && (() => { const Icon = iconMap[category.icon]; return <Icon className="h-4 w-4 text-purple-400" />; })()}
+                    {category.name}
+                  </h3>
+                  <div className="grid gap-2">
+                    {category.templates.map((template) => (
+                      <Button
+                        key={template.id}
+                        variant="outline"
+                        className="justify-start text-left h-auto py-3"
+                        onClick={() => {
+                          setSelectedTemplate(template.id);
+                          setShowTemplates(false);
+                          toast.success(`Template "${template.name}" selected`);
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium">{template.name}</div>
+                          <div className="text-xs text-gray-400">{template.prompt.slice(0, 60)}...</div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Generation Dialog */}
+      <Dialog open={showBulk} onOpenChange={setShowBulk}>
+        <DialogContent className="bg-slate-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl">Bulk Generation</DialogTitle>
+            <DialogDescription className="text-gray-400">Generate content for multiple topics at once (max 20)</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label className="text-gray-300">Topics (one per line)</Label>
+              <Textarea
+                placeholder="Topic 1&#10;Topic 2&#10;Topic 3"
+                value={bulkTopics}
+                onChange={(e) => setBulkTopics(e.target.value)}
+                className="bg-white/5 border-white/10 text-white min-h-[150px]"
+              />
+            </div>
+            <p className="text-sm text-gray-400">
+              {bulkTopics.split("\n").filter(t => t.trim()).length} topics × {contentTypes[selectedType]?.credits || 1} credits = 
+              <span className="text-purple-400 ml-1">
+                {bulkTopics.split("\n").filter(t => t.trim()).length * (contentTypes[selectedType]?.credits || 1)} credits total
+              </span>
+            </p>
+            <Button className="w-full bg-purple-500" onClick={handleBulkGenerate} disabled={generating}>
+              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              Generate All
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Brand Voice Dialog */}
+      <Dialog open={showBrandVoice} onOpenChange={setShowBrandVoice}>
+        <DialogContent className="bg-slate-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl">Brand Voices</DialogTitle>
+            <DialogDescription className="text-gray-400">Save your brand's tone for consistent content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {brandVoices.map((voice) => (
+              <div key={voice.id} className="p-3 bg-white/5 rounded-lg flex justify-between items-center">
+                <div>
+                  <div className="text-white font-medium">{voice.name}</div>
+                  <div className="text-gray-400 text-sm">{voice.tone} • {voice.style}</div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={async () => {
+                  await axios.delete(`${API}/users/${user.id}/brand-voice/${voice.id}`);
+                  fetchData();
+                  toast.success("Deleted");
+                }}>
+                  <Trash2 className="h-4 w-4 text-red-400" />
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => {
+              const name = prompt("Brand voice name:");
+              const tone = prompt("Tone (e.g., friendly, professional):");
+              const style = prompt("Style (e.g., concise, detailed):");
+              if (name && tone && style) {
+                axios.post(`${API}/users/${user.id}/brand-voice`, { name, tone, style, keywords: [], avoid_words: [] })
+                  .then(() => { fetchData(); toast.success("Created!"); });
+              }
+            }}>
+              <Plus className="h-4 w-4 mr-2" /> Add Brand Voice
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -613,63 +1069,20 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-6xl h-[80vh]">
           <DialogHeader>
-            <DialogTitle className="text-white text-xl flex items-center gap-2">
-              <Eye className="h-5 w-5 text-purple-400" /> Live Preview
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Eye className="text-purple-400" /> Live Preview
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              See your generated component in action
-            </DialogDescription>
           </DialogHeader>
-          <div className="flex-1 h-full min-h-0 mt-4">
+          <div className="flex-1 h-full mt-4">
             {generatedContent && extractCode(generatedContent) && (
               <Sandpack
                 template="react"
                 theme="dark"
-                options={{
-                  showNavigator: false,
-                  showTabs: true,
-                  showLineNumbers: true,
-                  editorHeight: "100%",
-                  externalResources: [
-                    "https://cdn.tailwindcss.com"
-                  ]
-                }}
-                customSetup={{
-                  dependencies: {
-                    "lucide-react": "latest"
-                  }
-                }}
+                options={{ showNavigator: false, showTabs: true, externalResources: ["https://cdn.tailwindcss.com"] }}
                 files={{
                   "/App.js": {
-                    code: `${extractCode(generatedContent)}
-
-// Render the component
-export default function App() {
-  // Try to find and render the main component
-  const Component = typeof PricingPage !== 'undefined' ? PricingPage 
-    : typeof Dashboard !== 'undefined' ? Dashboard
-    : typeof HomePage !== 'undefined' ? HomePage
-    : typeof LandingPage !== 'undefined' ? LandingPage
-    : typeof MainComponent !== 'undefined' ? MainComponent
-    : typeof Card !== 'undefined' ? Card
-    : typeof Hero !== 'undefined' ? Hero
-    : () => <div className="p-8 text-center text-gray-500">Component preview</div>;
-  
-  return <Component />;
-}`,
+                    code: `${extractCode(generatedContent)}\nexport default function App() { return <div className="p-4">Component Preview</div>; }`,
                     active: true
-                  },
-                  "/index.html": {
-                    code: `<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-  <div id="root"></div>
-</body>
-</html>`,
-                    hidden: true
                   }
                 }}
               />
@@ -681,8 +1094,8 @@ export default function App() {
   );
 };
 
-// Auth Component
-const AuthScreen = ({ onAuth }) => {
+// Auth Screen
+const AuthScreen = ({ onAuth, referralCode }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -696,12 +1109,12 @@ const AuthScreen = ({ onAuth }) => {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/users`, { email, name });
-      localStorage.setItem('ai_content_user', JSON.stringify(res.data));
+      const res = await axios.post(`${API}/users`, { email, name, referral_code: referralCode || null });
+      localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
       onAuth(res.data);
-      toast.success("Welcome to Champion AI Studio!");
+      toast.success(referralCode ? "Welcome! You got 5 bonus credits!" : "Welcome to Champion AI Studio!");
     } catch (e) {
-      toast.error("Failed to create account. Please try again.");
+      toast.error("Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -711,50 +1124,27 @@ const AuthScreen = ({ onAuth }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white/5 border-white/10">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Sparkles className="h-12 w-12 text-purple-400" />
-          </div>
+          <Sparkles className="h-12 w-12 text-purple-400 mx-auto mb-4" />
           <CardTitle className="text-2xl text-white">Get Started Free</CardTitle>
           <CardDescription className="text-gray-400">
-            Create your account and get 3 free credits
+            {referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "Create your account and get 3 free credits"}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="text-gray-300">Name</Label>
-              <Input
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                data-testid="auth-name-input"
-              />
+              <Input placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
             </div>
             <div className="space-y-2">
               <Label className="text-gray-300">Email</Label>
-              <Input
-                type="email"
-                placeholder="john@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                data-testid="auth-email-input"
-              />
+              <Input type="email" placeholder="john@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/5 border-white/10 text-white" />
             </div>
           </CardContent>
           <CardFooter>
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              disabled={loading}
-              data-testid="auth-submit-btn"
-            >
-              {loading ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating account...</>
-              ) : (
-                "Start Creating Content"
-              )}
+            <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Start Creating
             </Button>
           </CardFooter>
         </form>
@@ -763,57 +1153,38 @@ const AuthScreen = ({ onAuth }) => {
   );
 };
 
-// Main App Component
+// Main App
 function App() {
-  // Initialize state from localStorage synchronously
   const getInitialState = () => {
-    const savedUser = localStorage.getItem('ai_content_user');
-    if (savedUser) {
-      try {
-        return JSON.parse(savedUser);
-      } catch (e) {
-        localStorage.removeItem('ai_content_user');
-        return null;
-      }
+    const saved = localStorage.getItem('champion_ai_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { localStorage.removeItem('champion_ai_user'); }
     }
     return null;
   };
 
   const [user, setUser] = useState(getInitialState);
   const [showLanding, setShowLanding] = useState(() => !getInitialState());
-  const [loading, setLoading] = useState(false);
-
-  const handleGetStarted = () => {
-    setShowLanding(false);
-  };
-
-  const handleAuth = (userData) => {
-    setUser(userData);
-  };
+  
+  // Get referral code from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const referralCode = urlParams.get('ref');
 
   const handleLogout = () => {
-    localStorage.removeItem('ai_content_user');
+    localStorage.removeItem('champion_ai_user');
     setUser(null);
     setShowLanding(true);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="App">
       <Toaster position="top-right" richColors />
       {showLanding ? (
-        <LandingPage onGetStarted={handleGetStarted} />
+        <LandingPage onGetStarted={() => setShowLanding(false)} referralCode={referralCode} />
       ) : user ? (
         <Dashboard user={user} setUser={setUser} onLogout={handleLogout} />
       ) : (
-        <AuthScreen onAuth={handleAuth} />
+        <AuthScreen onAuth={setUser} referralCode={referralCode} />
       )}
     </div>
   );
