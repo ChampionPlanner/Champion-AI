@@ -55,19 +55,19 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
 
         <div className="text-center max-w-4xl mx-auto">
           <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/30">
-            <Zap className="h-3 w-3 mr-1" /> AI-Powered Content & Code Generation
+            <Zap className="h-3 w-3 mr-1" /> AI-Powered Design & Development
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Create Content & Code
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"> in Seconds</span>
+            Design Websites & Apps
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"> with AI</span>
           </h1>
           <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-            Generate blog posts, social media, emails, AI images, React code, and more. 
-            Support for 20+ languages. Repurpose content instantly.
+            Generate complete React code, UI components, landing pages, and full app designs in seconds. 
+            Plus content creation, AI images, and 20+ languages.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={onGetStarted} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg px-8 py-6" data-testid="hero-get-started-btn">
-              Start Free <ArrowRight className="ml-2 h-5 w-5" />
+              Start Building Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
           <p className="text-gray-400 mt-4">
@@ -75,29 +75,51 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
           </p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-4 gap-6 mt-24">
-          {[
-            { icon: Image, title: "AI Images", desc: "Generate custom images", highlight: true, badge: "NEW" },
-            { icon: RefreshCw, title: "Repurpose", desc: "1 piece → 10+ formats", highlight: true, badge: "NEW" },
-            { icon: Globe, title: "20+ Languages", desc: "Global content creation", highlight: true, badge: "NEW" },
-            { icon: Palette, title: "React Code", desc: "Components with preview", highlight: true, badge: "CODE" },
-            { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles" },
-            { icon: Share2, title: "Social Media", desc: "Viral-worthy posts" },
-            { icon: Mail, title: "Email Copy", desc: "Emails that convert" },
-            { icon: Megaphone, title: "Ad Copy", desc: "High-converting ads" }
-          ].map((feature, i) => (
-            <Card key={i} className={`${feature.highlight ? 'bg-purple-500/20 border-purple-500/50' : 'bg-white/5 border-white/10'} hover:bg-white/10 transition-all`}>
-              <CardHeader>
-                <feature.icon className={`h-10 w-10 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
-                <CardTitle className="text-white flex items-center gap-2">
-                  {feature.title}
-                  {feature.badge && <Badge className="bg-purple-500 text-xs">{feature.badge}</Badge>}
-                </CardTitle>
-                <CardDescription className="text-gray-400">{feature.desc}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+        {/* Hero Features - Design & Code First */}
+        <div className="grid md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-purple-600/30 to-pink-600/30 border border-purple-500/50 rounded-2xl p-8 text-center">
+            <Palette className="h-14 w-14 text-purple-300 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2">Web Design</h3>
+            <p className="text-gray-300">Generate complete landing pages, dashboards, and UI components with React + Tailwind</p>
+            <Badge className="mt-4 bg-purple-500">Live Preview</Badge>
+          </div>
+          <div className="bg-gradient-to-br from-blue-600/30 to-purple-600/30 border border-blue-500/50 rounded-2xl p-8 text-center">
+            <Layers className="h-14 w-14 text-blue-300 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2">App Design</h3>
+            <p className="text-gray-300">Full multi-page applications with routing, state management, and reusable components</p>
+            <Badge className="mt-4 bg-blue-500">Production Ready</Badge>
+          </div>
+          <div className="bg-gradient-to-br from-green-600/30 to-blue-600/30 border border-green-500/50 rounded-2xl p-8 text-center">
+            <Code className="h-14 w-14 text-green-300 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2">Code Generation</h3>
+            <p className="text-gray-300">Copy-paste ready React code with Tailwind CSS styling and modern best practices</p>
+            <Badge className="mt-4 bg-green-500">Copy & Use</Badge>
+          </div>
+        </div>
+
+        {/* More Features Grid */}
+        <div className="mt-20">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">Plus Everything Else You Need</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            {[
+              { icon: Image, title: "AI Images", desc: "Custom graphics & visuals", highlight: true },
+              { icon: RefreshCw, title: "Repurpose", desc: "1 piece → 10+ formats", highlight: true },
+              { icon: Globe, title: "20+ Languages", desc: "Global content creation", highlight: true },
+              { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles" },
+              { icon: Share2, title: "Social Media", desc: "Viral-worthy posts" },
+              { icon: Mail, title: "Email Copy", desc: "Emails that convert" },
+              { icon: Megaphone, title: "Ad Copy", desc: "High-converting ads" },
+              { icon: Layout, title: "Landing Pages", desc: "Conversion-focused copy" }
+            ].map((feature, i) => (
+              <Card key={i} className={`${feature.highlight ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'} hover:bg-white/10 transition-all`}>
+                <CardHeader className="p-4">
+                  <feature.icon className={`h-8 w-8 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
+                  <CardTitle className="text-white text-base">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-400 text-sm">{feature.desc}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* New Features Section */}
