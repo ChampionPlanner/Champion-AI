@@ -30,6 +30,8 @@ EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
 # Admin credentials (you can change this password)
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'ChampionAdmin2025!')
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+ADMIN_TOKENS = {}  # Simple in-memory token store
 
 # Create the main app
 app = FastAPI(title="Champion AI Studio API", version="2.0")
