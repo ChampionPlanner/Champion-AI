@@ -1194,10 +1194,26 @@ function App() {
   const [user, setUser] = useState(getInitialState);
   const [showLanding, setShowLanding] = useState(() => !getInitialState());
   
-  // Get referral code and admin route from URL
+  // Get referral code, payment status, and admin route from URL
   const urlParams = new URLSearchParams(window.location.search);
   const referralCode = urlParams.get('ref');
+  const paymentStatus = urlParams.get('payment');
   const isAdminRoute = window.location.pathname === '/admin' || window.location.hash === '#admin';
+
+  // Handle payment callbacks
+  useEffect(() => {
+    if (paymentStatus === 'success') {
+      toast.success("🎉 Payment successful! Credits have been added to your account.");
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'cancelled') {
+      toast.info("Payment was cancelled.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'error') {
+      toast.error("Payment failed. Please try again or contact support.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [paymentStatus]);
 
   const handleLogout = () => {
     localStorage.removeItem('champion_ai_user');
