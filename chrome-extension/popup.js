@@ -1,4 +1,4 @@
-const API_URL = 'https://profit-gen-20.preview.emergentagent.com/api';
+const API_URL = 'https://web-design-ai-2.preview.emergentagent.com/api';
 
 let apiKey = '';
 let userId = '';

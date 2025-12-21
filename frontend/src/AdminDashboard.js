@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { 
   Users, FileText, CreditCard, TrendingUp, Calendar, PieChart, 
-  RefreshCw, LogOut, Plus, Trash2, Eye, Download, Shield
+  RefreshCw, LogOut, Plus, Trash2, Eye, Download, Shield, User
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export default function AdminDashboard() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(() => localStorage.getItem('admin_token') || "");
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('admin_token'));
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -23,48 +25,94 @@ export default function AdminDashboard() {
     setLoading(true);
     setError("");
     try {
-      await axios.post(`${API}/admin/login?password=${encodeURIComponent(password)}`);
+      const res = await axios.post(`${API}/admin/login`, {
+        username: username,
+        password: password
+      });
+      const newToken = res.data.token;
+      setToken(newToken);
+      localStorage.setItem('admin_token', newToken);
       setIsLoggedIn(true);
-      fetchDashboard();
+      fetchDashboard(newToken);
     } catch (e) {
-      setError("Invalid password");
+      setError(e.response?.data?.detail || "Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchDashboard = async () => {
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${API}/admin/logout?token=${encodeURIComponent(token)}`);
+    } catch (e) {
+      // Ignore logout errors
+    }
+    localStorage.removeItem('admin_token');
+    setToken("");
+    setIsLoggedIn(false);
+    setData(null);
+    setUsername("");
+    setPassword("");
+  };
+
+  const fetchDashboard = async (authToken = token) => {
+    if (!authToken) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/admin/dashboard?password=${encodeURIComponent(password)}`);
+      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(authToken)}`);
       setData(res.data);
+      setError("");
     } catch (e) {
-      setError("Failed to load dashboard");
+      if (e.response?.status === 401) {
+        // Token expired or invalid
+        localStorage.removeItem('admin_token');
+        setToken("");
+        setIsLoggedIn(false);
+        setError("Session expired. Please login again.");
+      } else {
+        setError("Failed to load dashboard");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      fetchDashboard();
+    }
+  }, []);
 
   const handleAddCredits = async () => {
     if (!addCreditsUserId) return;
     try {
-      await axios.post(`${API}/admin/add-credits?user_id=${addCreditsUserId}&credits=${addCreditsAmount}&password=${encodeURIComponent(password)}`);
+      await axios.post(`${API}/admin/add-credits?user_id=${addCreditsUserId}&credits=${addCreditsAmount}&token=${encodeURIComponent(token)}`);
       alert(`Added ${addCreditsAmount} credits!`);
       fetchDashboard();
       setAddCreditsUserId("");
     } catch (e) {
-      alert("Failed to add credits");
+      if (e.response?.status === 401) {
+        handleLogout();
+        alert("Session expired. Please login again.");
+      } else {
+        alert("Failed to add credits");
+      }
     }
   };
 
   const handleDeleteUser = async (userId, email) => {
     if (!window.confirm(`Delete user ${email}? This cannot be undone.`)) return;
     try {
-      await axios.delete(`${API}/admin/user/${userId}?password=${encodeURIComponent(password)}`);
+      await axios.delete(`${API}/admin/user/${userId}?token=${encodeURIComponent(token)}`);
       alert("User deleted");
       fetchDashboard();
     } catch (e) {
-      alert("Failed to delete user");
+      if (e.response?.status === 401) {
+        handleLogout();
+        alert("Session expired. Please login again.");
+      } else {
+        alert("Failed to delete user");
+      }
     }
   };
 
@@ -92,22 +140,46 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-bold text-white">Admin Login</h1>
           </div>
           <form onSubmit={handleLogin}>
-            <input
-              type="password"
-              placeholder="Admin Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 mb-4"
-            />
-            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+            <div className="mb-4">
+              <label className="block text-gray-400 text-sm mb-2">Username</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Enter username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-3 pl-10 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                  autoComplete="username"
+                />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-400 text-sm mb-2">Password</label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 pl-10 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                  autoComplete="current-password"
+                />
+              </div>
+            </div>
+            {error && <p className="text-red-400 text-sm mb-4 bg-red-500/10 p-3 rounded-lg">{error}</p>}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold disabled:opacity-50"
+              disabled={loading || !username || !password}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Logging in..." : "Login to Admin Panel"}
             </button>
           </form>
+          <p className="text-gray-500 text-xs text-center mt-6">
+            This area is restricted to administrators only
+          </p>
         </div>
       </div>
     );
@@ -123,14 +195,14 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-bold text-white">Champion AI Studio - Admin</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={fetchDashboard} className="p-2 text-gray-400 hover:text-white">
+            <button onClick={() => fetchDashboard()} className="p-2 text-gray-400 hover:text-white">
               <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button onClick={exportCSV} className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">
               <Download className="h-4 w-4" /> Export CSV
             </button>
-            <button onClick={() => setIsLoggedIn(false)} className="p-2 text-gray-400 hover:text-white">
-              <LogOut className="h-5 w-5" />
+            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm">
+              <LogOut className="h-4 w-4" /> Logout
             </button>
           </div>
         </div>
