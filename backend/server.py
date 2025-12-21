@@ -217,7 +217,12 @@ class User(BaseModel):
 class UserCreate(BaseModel):
     email: str
     name: str
+    password: str
     referral_code: Optional[str] = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 class BrandVoice(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
