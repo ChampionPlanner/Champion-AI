@@ -17,7 +17,7 @@ import {
   Sparkles, FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Zap, Copy, History,
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
-  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages
+  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
@@ -265,6 +265,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     try {
       const res = await axios.get(`${API}/users/${user.id}`);
       setUser(res.data);
+      localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
     } catch (e) {
       console.error(e);
     }
@@ -894,6 +895,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
         <DialogContent className="bg-slate-900 border-white/10 max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Purchase Credits</DialogTitle>
+            <DialogDescription className="text-gray-400">Secure payment via PayPal</DialogDescription>
           </DialogHeader>
           <div className="grid md:grid-cols-3 gap-4 mt-4">
             {[
@@ -909,7 +911,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                 </CardHeader>
                 <CardFooter>
                   <Button className={`w-full ${plan.popular ? 'bg-purple-500' : ''}`} variant={plan.popular ? 'default' : 'outline'} onClick={() => handlePurchase(plan.key)}>
-                    Purchase
+                    Pay with PayPal
                   </Button>
                 </CardFooter>
               </Card>
@@ -1122,27 +1124,70 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   );
 };
 
-// Auth Screen
+// Auth Screen with Login/Signup
 const AuthScreen = ({ onAuth, referralCode }) => {
+  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !name.trim()) {
-      toast.error("Please fill in all fields");
+    setError("");
+    
+    if (!email.trim() || !name.trim() || !password.trim()) {
+      setError("Please fill in all fields");
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/users`, { email, name, referral_code: referralCode || null });
+      const res = await axios.post(`${API}/users`, { 
+        email, 
+        name, 
+        password,
+        referral_code: referralCode || null 
+      });
       localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
       onAuth(res.data);
       toast.success(referralCode ? "Welcome! You got 5 bonus credits!" : "Welcome to Champion AI Studio!");
     } catch (e) {
-      toast.error("Failed to create account");
+      setError(e.response?.data?.detail || "Failed to create account");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter email and password");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/login`, { email, password });
+      localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
+      onAuth(res.data);
+      toast.success("Welcome back!");
+    } catch (e) {
+      setError(e.response?.data?.detail || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -1153,27 +1198,94 @@ const AuthScreen = ({ onAuth, referralCode }) => {
       <Card className="w-full max-w-md bg-white/5 border-white/10">
         <CardHeader className="text-center">
           <Sparkles className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-          <CardTitle className="text-2xl text-white">Get Started Free</CardTitle>
+          <CardTitle className="text-2xl text-white">
+            {isLogin ? "Welcome Back" : "Create Account"}
+          </CardTitle>
           <CardDescription className="text-gray-400">
-            {referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "Create your account and get 3 free credits"}
+            {isLogin 
+              ? "Login to access your dashboard" 
+              : referralCode 
+                ? "🎁 You've been referred! Get 5 bonus credits!" 
+                : "Sign up and get 3 free credits"
+            }
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={isLogin ? handleLogin : handleSignup}>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-gray-300">Name</Label>
-              <Input placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
-            </div>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-gray-300">Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    placeholder="John Doe" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label className="text-gray-300">Email</Label>
-              <Input type="email" placeholder="john@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input 
+                  type="email" 
+                  placeholder="john@example.com" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  className="bg-white/5 border-white/10 text-white pl-10" 
+                />
+              </div>
             </div>
+            <div className="space-y-2">
+              <Label className="text-gray-300">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  className="bg-white/5 border-white/10 text-white pl-10" 
+                />
+              </div>
+            </div>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-gray-300">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+            )}
+            {error && (
+              <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>
+            )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-              Start Creating
+              {isLogin ? "Login" : "Create Account"}
             </Button>
+            <p className="text-gray-400 text-sm text-center">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button 
+                type="button"
+                onClick={() => { setIsLogin(!isLogin); setError(""); }}
+                className="text-purple-400 hover:text-purple-300 font-medium"
+              >
+                {isLogin ? "Sign up" : "Login"}
+              </button>
+            </p>
           </CardFooter>
         </form>
       </Card>
@@ -1204,6 +1316,13 @@ function App() {
   useEffect(() => {
     if (paymentStatus === 'success') {
       toast.success("🎉 Payment successful! Credits have been added to your account.");
+      // Refresh user data to get updated credits
+      if (user) {
+        axios.get(`${API}/users/${user.id}`).then(res => {
+          setUser(res.data);
+          localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
+        });
+      }
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (paymentStatus === 'cancelled') {
@@ -1213,7 +1332,7 @@ function App() {
       toast.error("Payment failed. Please try again or contact support.");
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, user]);
 
   const handleLogout = () => {
     localStorage.removeItem('champion_ai_user');
