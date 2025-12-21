@@ -208,7 +208,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [referralInfo, setReferralInfo] = useState(null);
   const [brandVoices, setBrandVoices] = useState([]);
-  const [selectedBrandVoice, setSelectedBrandVoice] = useState("");
+  const [selectedBrandVoice, setSelectedBrandVoice] = useState("none");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [bulkTopics, setBulkTopics] = useState("");
   const [repurposeContent, setRepurposeContent] = useState("");
