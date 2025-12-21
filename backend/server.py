@@ -987,9 +987,9 @@ async def admin_add_credits(
     return {"success": True, "message": f"Added {credits} credits to user {user_id}"}
 
 @api_router.delete("/admin/user/{user_id}")
-async def admin_delete_user(user_id: str, password: str = Query(...)):
+async def admin_delete_user(user_id: str, token: str = Query(...)):
     """Delete a user (admin only)"""
-    verify_admin(password)
+    verify_admin_token(token)
     
     await db.users.delete_one({"id": user_id})
     await db.generations.delete_many({"user_id": user_id})
