@@ -971,10 +971,10 @@ async def admin_dashboard(token: str = Query(...)):
 async def admin_add_credits(
     user_id: str = Query(...),
     credits: int = Query(...),
-    password: str = Query(...)
+    token: str = Query(...)
 ):
     """Add credits to a user (admin only)"""
-    verify_admin(password)
+    verify_admin_token(token)
     
     result = await db.users.update_one(
         {"id": user_id},
