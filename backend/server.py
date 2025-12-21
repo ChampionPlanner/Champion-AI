@@ -195,39 +195,56 @@ async def generate_content(request: GenerateRequest):
         "email": f"Write a professional email about: {request.topic}. Tone: {request.tone}. Include subject line, greeting, body, and sign-off. {request.additional_info or ''}",
         "ad_copy": f"Create high-converting ad copy for: {request.topic}. Tone: {request.tone}. Include headline, body, and strong CTA. {request.additional_info or ''}",
         "landing_page": f"Write conversion-focused landing page copy for: {request.topic}. Tone: {request.tone}. Include hero section, benefits, features, testimonial placeholder, and CTA sections. {request.additional_info or ''}",
-        "web_app_design": f"""Create a comprehensive UI/UX design specification for: {request.topic}. Style: {request.tone}.
+        "web_app_design": f"""Generate production-ready React code with Tailwind CSS for: {request.topic}. Style: {request.tone}.
 
-Include the following sections:
-1. **Design Overview** - App concept and target audience
-2. **Color Palette** - Primary, secondary, accent colors with hex codes
-3. **Typography** - Font recommendations for headings and body text
-4. **Key Screens/Pages** - List and describe 5-7 main screens with their purpose
-5. **Component Library** - Buttons, cards, forms, navigation elements
-6. **User Experience Notes** - Key interactions and micro-animations
-7. **Responsive Considerations** - Mobile, tablet, desktop adaptations
+Create a complete, functional React component that includes:
+
+1. **Full Component Code** - A working React functional component
+2. **Tailwind CSS Styling** - Modern, responsive design using Tailwind classes
+3. **All UI Elements** - Headers, buttons, cards, forms, navigation as needed
+4. **Responsive Design** - Mobile-first approach with responsive breakpoints
+5. **Interactive Elements** - Hover states, transitions, basic state management with useState
+
+Output the complete code that can be copied and used directly. Use modern React patterns (hooks, functional components).
+Include helpful comments explaining key sections.
+
+The code should be beautiful, professional, and production-ready.
 
 {request.additional_info or ''}""",
-        "wireframe": f"""Create a detailed wireframe and user flow specification for: {request.topic}. Style: {request.tone}.
+        "wireframe": f"""Generate a complete multi-page/multi-component React application structure for: {request.topic}. Style: {request.tone}.
 
-Include:
-1. **App Structure** - Information architecture and navigation hierarchy
-2. **User Flow Diagram** - Step-by-step user journey (described textually)
-3. **Screen-by-Screen Wireframe Descriptions**:
-   - Header/Navigation layout
-   - Main content areas
-   - Sidebar elements (if applicable)
-   - Footer structure
-   - Modal/popup descriptions
-4. **Key User Actions** - Primary CTAs and their placement
-5. **Form Structures** - Input fields, validation requirements
-6. **State Variations** - Empty states, loading states, error states
+Create the following:
+
+1. **Main App Component** - The root component with routing structure
+2. **Page Components** - 3-5 key pages/screens with full code
+3. **Reusable Components** - Navbar, Footer, Cards, Buttons, Forms
+4. **State Management** - Using React hooks (useState, useEffect)
+5. **Sample Data** - Mock data structures for the app
+
+For each component, provide:
+- Complete React code with Tailwind CSS
+- Props interface/documentation
+- Usage example
+
+Make the code production-ready and well-organized.
 
 {request.additional_info or ''}"""
     }
     
     # Select appropriate system message based on content type
     if request.content_type in ["web_app_design", "wireframe"]:
-        system_msg = "You are an expert UI/UX designer and product designer. Create detailed, professional design specifications that developers and designers can use to build beautiful, functional applications. Use industry-standard terminology and be specific with your recommendations."
+        system_msg = """You are an expert React developer and UI engineer. Generate clean, production-ready React code with Tailwind CSS.
+
+Rules:
+- Use functional components with hooks
+- Use Tailwind CSS for all styling (no separate CSS files)
+- Make components responsive (mobile-first)
+- Include proper TypeScript-style prop comments
+- Add helpful code comments
+- Use modern React patterns
+- Make the UI beautiful and professional
+- Include all necessary imports
+- Code should be copy-paste ready"""
     else:
         system_msg = "You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."
     
