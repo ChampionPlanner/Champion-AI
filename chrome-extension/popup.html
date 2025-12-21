@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 350px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+      color: white;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .header h1 { font-size: 16px; font-weight: 600; }
+    .logo { width: 24px; height: 24px; }
+    .credits {
+      background: rgba(139, 92, 246, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-left: auto;
+    }
+    .form-group { margin-bottom: 12px; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 4px;
+    }
+    select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 13px;
+    }
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .output {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    .output:empty { display: none; }
+    .copy-btn {
+      background: rgba(139, 92, 246, 0.3);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .login-form { text-align: center; padding: 20px 0; }
+    .login-form input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      margin-bottom: 10px;
+    }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    a { color: #a78bfa; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
+    </svg>
+    <h1>Champion AI Studio</h1>
+    <span class="credits" id="credits">-- credits</span>
+  </div>
+
+  <div id="login-view" class="login-form" style="display: none;">
+    <p style="margin-bottom: 16px; color: rgba(255,255,255,0.7);">Enter your API key to get started</p>
+    <input type="text" id="api-key-input" placeholder="Your API key (cai_...)">
+    <button class="btn btn-primary" onclick="saveApiKey()">Connect</button>
+    <p style="margin-top: 12px; font-size: 11px; color: rgba(255,255,255,0.5);">
+      Get your API key at <a href="https://championaistudio.com" target="_blank">championaistudio.com</a>
+    </p>
+  </div>
+
+  <div id="main-view" style="display: none;">
+    <div class="form-group">
+      <label>Content Type</label>
+      <select id="content-type">
+        <option value="social_media">Social Media (1 cr)</option>
+        <option value="email">Email Copy (1 cr)</option>
+        <option value="ad_copy">Ad Copy (1 cr)</option>
+        <option value="product_description">Product Description (1 cr)</option>
+        <option value="blog_post">Blog Post (2 cr)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Topic / What do you need?</label>
+      <textarea id="topic" placeholder="e.g., Write a tweet about our new product launch"></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="generate-btn" onclick="generate()">
+      <span id="btn-text">✨ Generate</span>
+      <div class="spinner" id="spinner" style="display: none;"></div>
+    </button>
+
+    <div class="output" id="output"></div>
+    <button class="copy-btn" id="copy-btn" style="display: none;" onclick="copyOutput()">📋 Copy to Clipboard</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
