@@ -886,9 +886,9 @@ async def admin_logout(token: str = Query(...)):
     return {"success": True, "message": "Logged out successfully"}
 
 @api_router.get("/admin/dashboard")
-async def admin_dashboard(password: str = Query(...)):
+async def admin_dashboard(token: str = Query(...)):
     """Get full admin dashboard data"""
-    verify_admin(password)
+    verify_admin_token(token)
     
     # Get counts
     total_users = await db.users.count_documents({})
