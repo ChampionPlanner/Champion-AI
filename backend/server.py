@@ -799,26 +799,165 @@ async def get_user_generations(user_id: str):
     
     return generations
 
-@api_router.post("/purchase-credits")
-async def purchase_credits(request: PurchaseCreditsRequest):
+# =============================================================================
+# PAYPAL PAYMENT ENDPOINTS
+# =============================================================================
+def get_paypal_access_token():
+    """Get PayPal OAuth access token"""
+    url = f"{PAYPAL_BASE_URL}/v1/oauth2/token"
+    auth = (PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET)
+    data = {"grant_type": "client_credentials"}
+    response = requests.post(url, auth=auth, data=data)
+    if response.status_code == 200:
+        return response.json()["access_token"]
+    raise HTTPException(status_code=500, detail="Failed to connect to PayPal")
+
+class CreatePaymentRequest(BaseModel):
+    user_id: str
+    plan: str
+
+@api_router.post("/create-payment")
+async def create_payment(request: CreatePaymentRequest):
+    """Create a PayPal payment order"""
     if request.plan not in PRICING_PLANS:
         raise HTTPException(status_code=400, detail="Invalid plan")
     
     plan = PRICING_PLANS[request.plan]
     
-    await db.users.update_one(
-        {"id": request.user_id},
-        {
-            "$inc": {"credits": plan["credits"]},
-            "$set": {"plan": request.plan}
+    # Get PayPal access token
+    token = get_paypal_access_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Create PayPal order
+    payment_data = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "amount": {
+                "currency_code": "USD",
+                "value": f"{plan['price']:.2f}"
+            },
+            "description": f"Champion AI Studio - {plan['name']} ({plan['credits']} credits)",
+            "custom_id": f"{request.user_id}|{request.plan}"  # Store user_id and plan for later
+        }],
+        "application_context": {
+            "brand_name": "Champion AI Studio",
+            "landing_page": "NO_PREFERENCE",
+            "user_action": "PAY_NOW",
+            "return_url": f"{os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001')}/api/payment-success",
+            "cancel_url": f"{os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001')}/api/payment-cancel"
         }
+    }
+    
+    response = requests.post(
+        f"{PAYPAL_BASE_URL}/v2/checkout/orders",
+        headers=headers,
+        json=payment_data
     )
     
+    if response.status_code == 201:
+        order = response.json()
+        approval_url = next((link["href"] for link in order["links"] if link["rel"] == "approve"), None)
+        return {
+            "success": True,
+            "order_id": order["id"],
+            "approval_url": approval_url
+        }
+    
+    raise HTTPException(status_code=400, detail="Failed to create PayPal order")
+
+@api_router.get("/payment-success")
+async def payment_success(token: str = Query(...)):
+    """Handle successful PayPal payment - capture the order"""
+    try:
+        # Get PayPal access token
+        access_token = get_paypal_access_token()
+        
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Get order details first
+        order_response = requests.get(
+            f"{PAYPAL_BASE_URL}/v2/checkout/orders/{token}",
+            headers=headers
+        )
+        
+        if order_response.status_code != 200:
+            return RedirectResponse(url="/?payment=error")
+        
+        order_data = order_response.json()
+        
+        # Capture the payment
+        capture_response = requests.post(
+            f"{PAYPAL_BASE_URL}/v2/checkout/orders/{token}/capture",
+            headers=headers
+        )
+        
+        if capture_response.status_code in [200, 201]:
+            capture_data = capture_response.json()
+            
+            # Extract user_id and plan from custom_id
+            custom_id = order_data.get("purchase_units", [{}])[0].get("custom_id", "")
+            if "|" in custom_id:
+                user_id, plan_key = custom_id.split("|")
+                
+                if plan_key in PRICING_PLANS:
+                    plan = PRICING_PLANS[plan_key]
+                    
+                    # Update user credits
+                    await db.users.update_one(
+                        {"id": user_id},
+                        {
+                            "$inc": {"credits": plan["credits"]},
+                            "$set": {"plan": plan_key}
+                        }
+                    )
+                    
+                    # Log the payment
+                    await db.payments.insert_one({
+                        "id": str(uuid.uuid4()),
+                        "user_id": user_id,
+                        "plan": plan_key,
+                        "amount": plan["price"],
+                        "credits": plan["credits"],
+                        "paypal_order_id": token,
+                        "status": "completed",
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    })
+            
+            # Redirect to success page
+            return RedirectResponse(url="/?payment=success")
+        
+        return RedirectResponse(url="/?payment=error")
+        
+    except Exception as e:
+        logging.error(f"Payment error: {e}")
+        return RedirectResponse(url="/?payment=error")
+
+@api_router.get("/payment-cancel")
+async def payment_cancel():
+    """Handle cancelled PayPal payment"""
+    return RedirectResponse(url="/?payment=cancelled")
+
+@api_router.post("/purchase-credits")
+async def purchase_credits(request: PurchaseCreditsRequest):
+    """Legacy endpoint - redirects to PayPal flow"""
+    if request.plan not in PRICING_PLANS:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+    
+    # Return info to trigger PayPal flow on frontend
+    plan = PRICING_PLANS[request.plan]
     return {
-        "success": True,
-        "message": f"Successfully purchased {plan['name']} plan!",
-        "credits_added": plan["credits"],
-        "price": plan["price"]
+        "success": False,
+        "use_paypal": True,
+        "message": f"Please use PayPal to purchase {plan['name']} plan",
+        "price": plan["price"],
+        "credits": plan["credits"]
     }
 
 @api_router.get("/stats")
