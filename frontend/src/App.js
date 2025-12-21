@@ -161,8 +161,27 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
 
         {/* Footer */}
-        <footer className="mt-32 text-center text-gray-400 pb-8">
-          <p>© 2025 Champion AI Studio. Generate revenue with AI-powered content.</p>
+        <footer className="mt-32 border-t border-white/10 pt-12 pb-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-purple-400" />
+                <span className="text-xl font-bold text-white">Champion AI Studio</span>
+              </div>
+              <div className="flex gap-6 text-gray-400">
+                <a href="https://championaistudio.com" className="hover:text-purple-400 transition-colors">Home</a>
+                <a href="https://championaistudio.com/#pricing" className="hover:text-purple-400 transition-colors">Pricing</a>
+                <a href="mailto:support@championaistudio.com" className="hover:text-purple-400 transition-colors">Support</a>
+              </div>
+            </div>
+            <div className="text-center text-gray-500 text-sm">
+              <p>© 2025 Champion AI Studio. All rights reserved.</p>
+              <p className="mt-2">
+                <a href="https://championaistudio.com" className="text-purple-400 hover:text-purple-300">championaistudio.com</a>
+                {" "} — Generate revenue with AI-powered content.
+              </p>
+            </div>
+          </div>
         </footer>
       </div>
     </div>
