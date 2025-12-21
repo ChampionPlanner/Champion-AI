@@ -619,24 +619,23 @@ const AuthScreen = ({ onAuth }) => {
 
 // Main App Component
 function App() {
-  const [user, setUser] = useState(null);
-  const [showLanding, setShowLanding] = useState(true);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check for existing user
+  // Initialize state from localStorage synchronously
+  const getInitialState = () => {
     const savedUser = localStorage.getItem('ai_content_user');
     if (savedUser) {
       try {
-        const parsed = JSON.parse(savedUser);
-        setUser(parsed);
-        setShowLanding(false);
+        return JSON.parse(savedUser);
       } catch (e) {
         localStorage.removeItem('ai_content_user');
+        return null;
       }
     }
-    setLoading(false);
-  }, []);
+    return null;
+  };
+
+  const [user, setUser] = useState(getInitialState);
+  const [showLanding, setShowLanding] = useState(() => !getInitialState());
+  const [loading, setLoading] = useState(false);
 
   const handleGetStarted = () => {
     setShowLanding(false);
