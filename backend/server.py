@@ -194,15 +194,49 @@ async def generate_content(request: GenerateRequest):
         "product_description": f"Write a compelling product description for: {request.topic}. Tone: {request.tone}. Highlight benefits, features, and include a persuasive CTA. {request.additional_info or ''}",
         "email": f"Write a professional email about: {request.topic}. Tone: {request.tone}. Include subject line, greeting, body, and sign-off. {request.additional_info or ''}",
         "ad_copy": f"Create high-converting ad copy for: {request.topic}. Tone: {request.tone}. Include headline, body, and strong CTA. {request.additional_info or ''}",
-        "landing_page": f"Write conversion-focused landing page copy for: {request.topic}. Tone: {request.tone}. Include hero section, benefits, features, testimonial placeholder, and CTA sections. {request.additional_info or ''}"
+        "landing_page": f"Write conversion-focused landing page copy for: {request.topic}. Tone: {request.tone}. Include hero section, benefits, features, testimonial placeholder, and CTA sections. {request.additional_info or ''}",
+        "web_app_design": f"""Create a comprehensive UI/UX design specification for: {request.topic}. Style: {request.tone}.
+
+Include the following sections:
+1. **Design Overview** - App concept and target audience
+2. **Color Palette** - Primary, secondary, accent colors with hex codes
+3. **Typography** - Font recommendations for headings and body text
+4. **Key Screens/Pages** - List and describe 5-7 main screens with their purpose
+5. **Component Library** - Buttons, cards, forms, navigation elements
+6. **User Experience Notes** - Key interactions and micro-animations
+7. **Responsive Considerations** - Mobile, tablet, desktop adaptations
+
+{request.additional_info or ''}""",
+        "wireframe": f"""Create a detailed wireframe and user flow specification for: {request.topic}. Style: {request.tone}.
+
+Include:
+1. **App Structure** - Information architecture and navigation hierarchy
+2. **User Flow Diagram** - Step-by-step user journey (described textually)
+3. **Screen-by-Screen Wireframe Descriptions**:
+   - Header/Navigation layout
+   - Main content areas
+   - Sidebar elements (if applicable)
+   - Footer structure
+   - Modal/popup descriptions
+4. **Key User Actions** - Primary CTAs and their placement
+5. **Form Structures** - Input fields, validation requirements
+6. **State Variations** - Empty states, loading states, error states
+
+{request.additional_info or ''}"""
     }
+    
+    # Select appropriate system message based on content type
+    if request.content_type in ["web_app_design", "wireframe"]:
+        system_msg = "You are an expert UI/UX designer and product designer. Create detailed, professional design specifications that developers and designers can use to build beautiful, functional applications. Use industry-standard terminology and be specific with your recommendations."
+    else:
+        system_msg = "You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."
     
     try:
         # Create a new LlmChat instance for each request
         llm_client = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=str(uuid.uuid4()),
-            system_message="You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."
+            system_message=system_msg
         )
         llm_client = llm_client.with_model("openai", "gpt-4o-mini")
         
