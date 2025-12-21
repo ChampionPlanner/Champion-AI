@@ -840,6 +840,131 @@ async def api_generate(
     return await generate_content(request)
 
 # =============================================================================
+# ADMIN ENDPOINTS
+# =============================================================================
+def verify_admin(password: str):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid admin password")
+
+@api_router.post("/admin/login")
+async def admin_login(password: str = Query(...)):
+    """Admin login - returns success if password is correct"""
+    if password == ADMIN_PASSWORD:
+        return {"success": True, "message": "Admin authenticated"}
+    raise HTTPException(status_code=401, detail="Invalid password")
+
+@api_router.get("/admin/dashboard")
+async def admin_dashboard(password: str = Query(...)):
+    """Get full admin dashboard data"""
+    verify_admin(password)
+    
+    # Get counts
+    total_users = await db.users.count_documents({})
+    total_generations = await db.generations.count_documents({})
+    
+    # Get all users
+    users = await db.users.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Calculate total credits in circulation
+    total_credits = sum(u.get('credits', 0) for u in users)
+    total_referral_credits = sum(u.get('referral_credits_earned', 0) for u in users)
+    
+    # Get users by plan
+    plan_counts = {}
+    for u in users:
+        plan = u.get('plan', 'free')
+        plan_counts[plan] = plan_counts.get(plan, 0) + 1
+    
+    # Get recent generations
+    recent_generations = await db.generations.find(
+        {}, {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Content type usage
+    content_type_usage = {}
+    all_generations = await db.generations.find({}, {"content_type": 1}).to_list(10000)
+    for gen in all_generations:
+        ct = gen.get('content_type', 'unknown')
+        content_type_usage[ct] = content_type_usage.get(ct, 0) + 1
+    
+    # Get today's stats
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_users = await db.users.count_documents({"created_at": {"$gte": today.isoformat()}})
+    today_generations = await db.generations.count_documents({"created_at": {"$gte": today.isoformat()}})
+    
+    # Get this week's stats
+    week_ago = today - timedelta(days=7)
+    week_users = await db.users.count_documents({"created_at": {"$gte": week_ago.isoformat()}})
+    week_generations = await db.generations.count_documents({"created_at": {"$gte": week_ago.isoformat()}})
+    
+    return {
+        "overview": {
+            "total_users": total_users,
+            "total_generations": total_generations,
+            "total_credits_in_circulation": total_credits,
+            "total_referral_credits_earned": total_referral_credits,
+            "today_new_users": today_users,
+            "today_generations": today_generations,
+            "week_new_users": week_users,
+            "week_generations": week_generations
+        },
+        "users_by_plan": plan_counts,
+        "content_type_usage": content_type_usage,
+        "recent_users": [{
+            "id": u.get('id'),
+            "email": u.get('email'),
+            "name": u.get('name'),
+            "credits": u.get('credits', 0),
+            "plan": u.get('plan', 'free'),
+            "generations_count": len(u.get('generations', [])),
+            "referral_credits": u.get('referral_credits_earned', 0),
+            "created_at": u.get('created_at')
+        } for u in users[:50]],
+        "recent_generations": recent_generations,
+        "all_users": [{
+            "id": u.get('id'),
+            "email": u.get('email'),
+            "name": u.get('name'),
+            "credits": u.get('credits', 0),
+            "plan": u.get('plan', 'free'),
+            "generations_count": len(u.get('generations', [])),
+            "referral_code": u.get('referral_code'),
+            "referred_by": u.get('referred_by'),
+            "referral_credits": u.get('referral_credits_earned', 0),
+            "created_at": u.get('created_at')
+        } for u in users]
+    }
+
+@api_router.post("/admin/add-credits")
+async def admin_add_credits(
+    user_id: str = Query(...),
+    credits: int = Query(...),
+    password: str = Query(...)
+):
+    """Add credits to a user (admin only)"""
+    verify_admin(password)
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {"credits": credits}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"success": True, "message": f"Added {credits} credits to user {user_id}"}
+
+@api_router.delete("/admin/user/{user_id}")
+async def admin_delete_user(user_id: str, password: str = Query(...)):
+    """Delete a user (admin only)"""
+    verify_admin(password)
+    
+    await db.users.delete_one({"id": user_id})
+    await db.generations.delete_many({"user_id": user_id})
+    
+    return {"success": True, "message": f"Deleted user {user_id}"}
+
+# =============================================================================
 # APP SETUP
 # =============================================================================
 app.include_router(api_router)
