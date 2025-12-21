@@ -1166,15 +1166,22 @@ function App() {
   const [user, setUser] = useState(getInitialState);
   const [showLanding, setShowLanding] = useState(() => !getInitialState());
   
-  // Get referral code from URL
+  // Get referral code and admin route from URL
   const urlParams = new URLSearchParams(window.location.search);
   const referralCode = urlParams.get('ref');
+  const isAdminRoute = window.location.pathname === '/admin' || window.location.hash === '#admin';
 
   const handleLogout = () => {
     localStorage.removeItem('champion_ai_user');
     setUser(null);
     setShowLanding(true);
   };
+
+  // Check for admin route
+  if (isAdminRoute) {
+    const AdminDashboard = require('./AdminDashboard').default;
+    return <AdminDashboard />;
+  }
 
   return (
     <div className="App">
