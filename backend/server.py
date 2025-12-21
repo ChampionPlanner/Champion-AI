@@ -192,7 +192,7 @@ async def generate_content(request: GenerateRequest):
             session_id=str(uuid.uuid4()),
             system_message="You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."
         )
-        llm_client = llm_client.with_model("gpt-4o-mini")
+        llm_client = llm_client.with_model("openai", "gpt-4o-mini")
         
         user_msg = UserMessage(text=prompts[request.content_type])
         generated_text = await llm_client.send_message(user_msg)
