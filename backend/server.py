@@ -844,16 +844,46 @@ async def api_generate(
 # =============================================================================
 # ADMIN ENDPOINTS
 # =============================================================================
-def verify_admin(password: str):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Invalid admin password")
+def verify_admin_token(token: str):
+    """Verify admin token is valid"""
+    if not token or token not in ADMIN_TOKENS:
+        raise HTTPException(status_code=401, detail="Invalid or expired admin session")
+    # Check token expiry (24 hours)
+    token_data = ADMIN_TOKENS[token]
+    if datetime.now(timezone.utc) > token_data['expires']:
+        del ADMIN_TOKENS[token]
+        raise HTTPException(status_code=401, detail="Session expired, please login again")
+
+class AdminLoginRequest(BaseModel):
+    username: str
+    password: str
 
 @api_router.post("/admin/login")
-async def admin_login(password: str = Query(...)):
-    """Admin login - returns success if password is correct"""
-    if password == ADMIN_PASSWORD:
-        return {"success": True, "message": "Admin authenticated"}
-    raise HTTPException(status_code=401, detail="Invalid password")
+async def admin_login(request: AdminLoginRequest):
+    """Admin login with username and password - returns auth token"""
+    if request.username == ADMIN_USERNAME and request.password == ADMIN_PASSWORD:
+        # Generate a secure token
+        token = str(uuid4()) + "-" + str(uuid4())
+        expires = datetime.now(timezone.utc) + timedelta(hours=24)
+        ADMIN_TOKENS[token] = {
+            'username': request.username,
+            'created': datetime.now(timezone.utc).isoformat(),
+            'expires': expires
+        }
+        return {
+            "success": True, 
+            "message": "Admin authenticated",
+            "token": token,
+            "expires": expires.isoformat()
+        }
+    raise HTTPException(status_code=401, detail="Invalid username or password")
+
+@api_router.post("/admin/logout")
+async def admin_logout(token: str = Query(...)):
+    """Admin logout - invalidate token"""
+    if token in ADMIN_TOKENS:
+        del ADMIN_TOKENS[token]
+    return {"success": True, "message": "Logged out successfully"}
 
 @api_router.get("/admin/dashboard")
 async def admin_dashboard(password: str = Query(...)):
