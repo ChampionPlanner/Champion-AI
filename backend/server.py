@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-from openai import OpenAI
+from emergentintegrations.llm.openai import LlmChat
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -19,11 +19,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# OpenAI client with Emergent key
-openai_client = OpenAI(
-    api_key=os.environ.get('EMERGENT_LLM_KEY'),
-    base_url="https://api.emergentagi.com/v1"
-)
+# LLM Chat client with Emergent key
+llm_client = LlmChat(api_key=os.environ.get('EMERGENT_LLM_KEY'))
 
 # Create the main app
 app = FastAPI()
@@ -133,6 +130,8 @@ async def create_user(input: UserCreate):
     # Check if user exists
     existing = await db.users.find_one({"email": input.email}, {"_id": 0})
     if existing:
+        if isinstance(existing.get('created_at'), str):
+            existing['created_at'] = datetime.fromisoformat(existing['created_at'])
         return User(**existing)
     
     user = User(**input.model_dump())
@@ -187,16 +186,11 @@ async def generate_content(request: GenerateRequest):
     }
     
     try:
-        response = openai_client.chat.completions.create(
+        generated_text = await llm_client.chat(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure."},
-                {"role": "user", "content": prompts[request.content_type]}
-            ],
-            max_tokens=2000,
-            temperature=0.7
+            system_prompt="You are a professional content writer and copywriter. Create high-quality, engaging content that drives results. Format your output nicely with proper structure.",
+            user_prompt=prompts[request.content_type]
         )
-        generated_text = response.choices[0].message.content
     except Exception as e:
         logging.error(f"AI generation error: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate content. Please try again.")
