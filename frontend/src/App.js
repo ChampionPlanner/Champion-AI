@@ -460,12 +460,36 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center justify-between">
-                    Generated Content
-                    {generatedContent && (
-                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedContent)} className="text-purple-400" data-testid="copy-btn">
-                        <Copy className="h-4 w-4 mr-1" /> Copy
-                      </Button>
-                    )}
+                    <span>Generated Content</span>
+                    <div className="flex items-center gap-2">
+                      {generatedContent && isCodeType && extractCode(generatedContent) && (
+                        <div className="flex bg-white/10 rounded-lg p-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setViewMode("code")}
+                            className={`${viewMode === "code" ? "bg-purple-500 text-white" : "text-gray-400"} px-3 py-1 h-7`}
+                            data-testid="view-code-btn"
+                          >
+                            <Code className="h-3 w-3 mr-1" /> Code
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setShowPreview(true)}
+                            className="text-gray-400 hover:text-white px-3 py-1 h-7"
+                            data-testid="view-preview-btn"
+                          >
+                            <Eye className="h-3 w-3 mr-1" /> Preview
+                          </Button>
+                        </div>
+                      )}
+                      {generatedContent && (
+                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedContent)} className="text-purple-400" data-testid="copy-btn">
+                          <Copy className="h-4 w-4 mr-1" /> Copy
+                        </Button>
+                      )}
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -477,7 +501,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                       </div>
                     ) : generatedContent ? (
                       <div className="prose prose-invert max-w-none">
-                        <pre className="whitespace-pre-wrap text-gray-300 font-sans text-sm leading-relaxed">
+                        <pre className="whitespace-pre-wrap text-gray-300 font-sans text-sm leading-relaxed bg-black/30 p-4 rounded-lg overflow-x-auto">
                           {generatedContent}
                         </pre>
                       </div>
