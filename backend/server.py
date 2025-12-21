@@ -304,18 +304,21 @@ async def get_templates():
 # =============================================================================
 # USER ROUTES
 # =============================================================================
+def hash_password(password: str) -> str:
+    """Hash a password using SHA256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
 @api_router.post("/users", response_model=User)
 async def create_user(input: UserCreate):
+    """Register a new user"""
     existing = await db.users.find_one({"email": input.email}, {"_id": 0})
     if existing:
-        if isinstance(existing.get('created_at'), str):
-            existing['created_at'] = datetime.fromisoformat(existing['created_at'])
-        # Ensure referral_code exists for old users
-        if not existing.get('referral_code'):
-            existing['referral_code'] = secrets.token_urlsafe(8)
-        return User(**existing)
+        raise HTTPException(status_code=400, detail="Email already registered. Please login instead.")
     
-    # Only pass email and name to User, let defaults handle the rest
+    # Hash password
+    password_hash = hash_password(input.password)
+    
+    # Create user data
     user_data = {"email": input.email, "name": input.name}
     
     # Handle referral
@@ -336,8 +339,37 @@ async def create_user(input: UserCreate):
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    doc['password_hash'] = password_hash  # Store password hash
     await db.users.insert_one(doc)
     return user
+
+@api_router.post("/login", response_model=User)
+async def login_user(input: UserLogin):
+    """Login with email and password"""
+    user = await db.users.find_one({"email": input.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Verify password
+    password_hash = hash_password(input.password)
+    stored_hash = user.get('password_hash', '')
+    
+    # For users created before password system, allow any password and set it
+    if not stored_hash:
+        # Migrate old user - set their password
+        await db.users.update_one(
+            {"email": input.email},
+            {"$set": {"password_hash": password_hash}}
+        )
+    elif stored_hash != password_hash:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    if isinstance(user['created_at'], str):
+        user['created_at'] = datetime.fromisoformat(user['created_at'])
+    
+    # Remove password_hash from response
+    user.pop('password_hash', None)
+    return User(**user)
 
 @api_router.get("/users/{user_id}", response_model=User)
 async def get_user(user_id: str):
@@ -346,6 +378,7 @@ async def get_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
     if isinstance(user['created_at'], str):
         user['created_at'] = datetime.fromisoformat(user['created_at'])
+    user.pop('password_hash', None)
     return User(**user)
 
 @api_router.get("/users/email/{email}", response_model=User)
@@ -355,6 +388,7 @@ async def get_user_by_email(email: str):
         raise HTTPException(status_code=404, detail="User not found")
     if isinstance(user['created_at'], str):
         user['created_at'] = datetime.fromisoformat(user['created_at'])
+    user.pop('password_hash', None)
     return User(**user)
 
 # =============================================================================
