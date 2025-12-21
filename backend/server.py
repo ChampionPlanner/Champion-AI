@@ -195,7 +195,7 @@ class User(BaseModel):
     plan: str = "free"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     generations: List[str] = []
-    referral_code: str = Field(default_factory=lambda: secrets.token_urlsafe(8))
+    referral_code: Optional[str] = Field(default_factory=lambda: secrets.token_urlsafe(8))
     referred_by: Optional[str] = None
     referral_credits_earned: int = 0
     brand_voices: List[Dict] = []
