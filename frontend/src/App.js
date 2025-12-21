@@ -277,7 +277,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
         tone,
         language,
         additional_info: additionalInfo,
-        brand_voice_id: selectedBrandVoice || null,
+        brand_voice_id: selectedBrandVoice !== "none" ? selectedBrandVoice : null,
         template_id: selectedTemplate || null
       });
       setGeneratedContent(res.data.generated_content);
