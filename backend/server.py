@@ -65,6 +65,18 @@ CONTENT_TYPES = {
         "description": "Conversion-focused web copy",
         "credits": 3,
         "icon": "Layout"
+    },
+    "web_app_design": {
+        "name": "Web & App Design",
+        "description": "AI-powered UI/UX design specs",
+        "credits": 3,
+        "icon": "Palette"
+    },
+    "wireframe": {
+        "name": "Wireframe & Flow",
+        "description": "App structure and user flows",
+        "credits": 2,
+        "icon": "Layers"
     }
 }
 
