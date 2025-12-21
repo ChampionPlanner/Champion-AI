@@ -401,12 +401,18 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
   const handlePurchase = async (plan) => {
     try {
-      const res = await axios.post(`${API}/purchase-credits`, { user_id: user.id, plan });
-      toast.success(res.data.message);
-      refreshUser();
-      setShowPricing(false);
+      // Create PayPal payment order
+      const res = await axios.post(`${API}/create-payment`, { user_id: user.id, plan });
+      
+      if (res.data.success && res.data.approval_url) {
+        // Redirect to PayPal for payment
+        toast.info("Redirecting to PayPal...");
+        window.location.href = res.data.approval_url;
+      } else {
+        toast.error("Failed to initiate payment");
+      }
     } catch (e) {
-      toast.error("Purchase failed");
+      toast.error("Payment failed - please try again");
     }
   };
 
