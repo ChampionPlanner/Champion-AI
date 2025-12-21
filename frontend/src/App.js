@@ -100,8 +100,8 @@ const LandingPage = ({ onGetStarted }) => {
         {/* Features Grid */}
         <div className="grid md:grid-cols-4 gap-6 mt-24">
           {[
-            { icon: Palette, title: "Web & App Design", desc: "AI-powered UI/UX specifications", highlight: true },
-            { icon: Layers, title: "Wireframes & Flows", desc: "App structure and user journeys", highlight: true },
+            { icon: Palette, title: "Component Code", desc: "React + Tailwind components", highlight: true },
+            { icon: Layers, title: "Full App Code", desc: "Complete multi-page apps", highlight: true },
             { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles that rank" },
             { icon: Share2, title: "Social Media", desc: "Viral-worthy posts for any platform" },
             { icon: Mail, title: "Email Copy", desc: "Emails that get opened and clicked" },
@@ -114,7 +114,7 @@ const LandingPage = ({ onGetStarted }) => {
                 <feature.icon className={`h-10 w-10 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
                 <CardTitle className="text-white flex items-center gap-2">
                   {feature.title}
-                  {feature.highlight && <Badge className="bg-purple-500 text-xs">NEW</Badge>}
+                  {feature.highlight && <Badge className="bg-purple-500 text-xs">CODE</Badge>}
                 </CardTitle>
                 <CardDescription className="text-gray-400">{feature.desc}</CardDescription>
               </CardHeader>
