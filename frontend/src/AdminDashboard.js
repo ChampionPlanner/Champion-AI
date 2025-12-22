@@ -56,21 +56,25 @@ export default function AdminDashboard() {
   };
 
   const fetchDashboard = async (authToken = token) => {
-    if (!authToken) return;
+    if (!authToken) {
+      setIsLoggedIn(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(authToken)}`);
       setData(res.data);
       setError("");
     } catch (e) {
+      // Any error - clear token and show login
+      localStorage.removeItem('admin_token');
+      setToken("");
+      setIsLoggedIn(false);
+      setData(null);
       if (e.response?.status === 401) {
-        // Token expired or invalid
-        localStorage.removeItem('admin_token');
-        setToken("");
-        setIsLoggedIn(false);
         setError("Session expired. Please login again.");
       } else {
-        setError("Failed to load dashboard");
+        setError("Connection error. Please login again.");
       }
     } finally {
       setLoading(false);
@@ -80,6 +84,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isLoggedIn && token) {
       fetchDashboard();
+    } else {
+      // No valid token, ensure we show login screen
+      setIsLoggedIn(false);
+      setLoading(false);
     }
   }, []);
 
