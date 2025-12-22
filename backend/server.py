@@ -371,6 +371,79 @@ async def login_user(input: UserLogin):
     user.pop('password_hash', None)
     return User(**user)
 
+# Password Reset
+PASSWORD_RESET_TOKENS = {}  # In-memory store for reset tokens
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+class PasswordResetConfirm(BaseModel):
+    email: str
+    token: str
+    new_password: str
+
+@api_router.post("/forgot-password")
+async def forgot_password(request: PasswordResetRequest):
+    """Request password reset - generates a 6-digit code"""
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        # Don't reveal if email exists or not for security
+        return {"success": True, "message": "If this email exists, a reset code has been generated"}
+    
+    # Generate 6-digit reset code
+    reset_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+    expires = datetime.now(timezone.utc) + timedelta(minutes=15)
+    
+    PASSWORD_RESET_TOKENS[request.email] = {
+        "code": reset_code,
+        "expires": expires
+    }
+    
+    # In production, you would email this code
+    # For now, we'll return it (you can remove this in production)
+    return {
+        "success": True, 
+        "message": "Reset code generated. Check your email.",
+        "code": reset_code,  # Remove this line in production - only for testing
+        "expires_in": "15 minutes"
+    }
+
+@api_router.post("/reset-password")
+async def reset_password(request: PasswordResetConfirm):
+    """Reset password with the code"""
+    if request.email not in PASSWORD_RESET_TOKENS:
+        raise HTTPException(status_code=400, detail="No reset code found. Please request a new one.")
+    
+    token_data = PASSWORD_RESET_TOKENS[request.email]
+    
+    # Check if expired
+    if datetime.now(timezone.utc) > token_data["expires"]:
+        del PASSWORD_RESET_TOKENS[request.email]
+        raise HTTPException(status_code=400, detail="Reset code has expired. Please request a new one.")
+    
+    # Verify code
+    if token_data["code"] != request.token:
+        raise HTTPException(status_code=400, detail="Invalid reset code")
+    
+    # Validate new password
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Update password
+    new_hash = hash_password(request.new_password)
+    result = await db.users.update_one(
+        {"email": request.email},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Remove used token
+    del PASSWORD_RESET_TOKENS[request.email]
+    
+    return {"success": True, "message": "Password has been reset successfully"}
+
 @api_router.get("/users/{user_id}", response_model=User)
 async def get_user(user_id: str):
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
