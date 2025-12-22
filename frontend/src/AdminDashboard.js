@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { 
   Users, FileText, CreditCard, TrendingUp, Calendar, PieChart, 
-  RefreshCw, LogOut, Plus, Trash2, Eye, Download, Shield, User
+  RefreshCw, LogOut, Plus, Trash2, Eye, Download, Shield, User, MessageCircle
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
