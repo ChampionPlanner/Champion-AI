@@ -489,18 +489,18 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 flex-wrap">
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500">
-              <Sparkles className="h-4 w-4 mr-2" /> Generate
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 h-auto">
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <Sparkles className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Generate</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500">
-              <Image className="h-4 w-4 mr-2" /> AI Image
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <Image className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">AI Image</span>
             </TabsTrigger>
-            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500">
-              <RefreshCw className="h-4 w-4 mr-2" /> Repurpose
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <RefreshCw className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Repurpose</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500">
-              <History className="h-4 w-4 mr-2" /> History
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
             </TabsTrigger>
           </TabsList>
 
