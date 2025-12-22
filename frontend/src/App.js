@@ -476,10 +476,10 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <Button variant="ghost" size="sm" onClick={() => setShowApiKey(true)} className="text-gray-300 px-2 hidden md:flex">
               <Key className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2 text-gray-300 ml-1 md:ml-2 hidden md:flex">
+            <Button variant="ghost" size="sm" onClick={() => setShowProfile(true)} className="text-gray-300 px-2 flex items-center gap-1">
               <User className="h-4 w-4" />
               <span className="text-sm hidden md:inline">{user.name}</span>
-            </div>
+            </Button>
             <Button variant="ghost" size="icon" onClick={onLogout} className="text-gray-400">
               <LogOut className="h-4 w-4" />
             </Button>
