@@ -414,6 +414,49 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
+
+            {/* Chat Logs Tab */}
+            {activeTab === "chat_logs" && (
+              <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-white/10 flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-purple-400" />
+                  <h3 className="text-white font-semibold">AI Chat Logs</h3>
+                  <span className="text-gray-400 text-sm">({data.chat_logs?.length || 0} conversations)</span>
+                </div>
+                <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto">
+                  {data.chat_logs && data.chat_logs.length > 0 ? (
+                    data.chat_logs.map((log) => (
+                      <div key={log.id} className="p-4 hover:bg-white/5">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-blue-400" />
+                            <span className="text-white font-medium">{log.user_name}</span>
+                            <span className="text-gray-500 text-sm">({log.user_email})</span>
+                          </div>
+                          <span className="text-gray-500 text-xs">{new Date(log.created_at).toLocaleString()}</span>
+                        </div>
+                        <div className="ml-6 space-y-2">
+                          <div className="bg-purple-500/20 p-3 rounded-lg">
+                            <p className="text-purple-200 text-sm font-medium">Question:</p>
+                            <p className="text-white">{log.question}</p>
+                          </div>
+                          <div className="bg-white/5 p-3 rounded-lg">
+                            <p className="text-gray-400 text-sm font-medium">AI Response:</p>
+                            <p className="text-gray-300 text-sm whitespace-pre-wrap">{log.response}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No chat logs yet</p>
+                      <p className="text-sm">Chat conversations will appear here</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
 
