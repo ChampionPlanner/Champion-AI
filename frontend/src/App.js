@@ -451,28 +451,28 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const IconComponent = iconMap[contentTypes[selectedType]?.icon] || FileText;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-x-hidden">
       {/* Header */}
       <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center max-w-full overflow-hidden">
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-purple-400" />
-            <span className="text-xl font-bold text-white">Champion AI Studio</span>
+            <span className="text-lg md:text-xl font-bold text-white">Champion AI</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="border-purple-400 text-purple-400 px-3 py-1" data-testid="credits-badge">
-              <Zap className="h-3 w-3 mr-1" /> {user.credits} Credits
+          <div className="flex items-center gap-1 md:gap-3 flex-wrap justify-end">
+            <Badge variant="outline" className="border-purple-400 text-purple-400 px-2 md:px-3 py-1 text-xs md:text-sm" data-testid="credits-badge">
+              <Zap className="h-3 w-3 mr-1" /> {user.credits}
             </Badge>
-            <Button variant="ghost" size="sm" onClick={() => setShowPricing(true)} className="text-gray-300" data-testid="buy-credits-btn">
-              <CreditCard className="h-4 w-4 mr-1" /> Buy
+            <Button variant="ghost" size="sm" onClick={() => setShowPricing(true)} className="text-gray-300 px-2" data-testid="buy-credits-btn">
+              <CreditCard className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowReferral(true)} className="text-gray-300">
-              <Gift className="h-4 w-4 mr-1" /> Refer
+            <Button variant="ghost" size="sm" onClick={() => setShowReferral(true)} className="text-gray-300 px-2 hidden md:flex">
+              <Gift className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowApiKey(true)} className="text-gray-300">
-              <Key className="h-4 w-4 mr-1" /> API
+            <Button variant="ghost" size="sm" onClick={() => setShowApiKey(true)} className="text-gray-300 px-2 hidden md:flex">
+              <Key className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2 text-gray-300 ml-2">
+            <div className="flex items-center gap-2 text-gray-300 ml-1 md:ml-2 hidden md:flex">
               <User className="h-4 w-4" />
               <span className="text-sm hidden md:inline">{user.name}</span>
             </div>
