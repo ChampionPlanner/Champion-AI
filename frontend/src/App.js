@@ -544,7 +544,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                   <MessageCircle className="h-5 w-5 text-purple-400" /> Ask AI Anything
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30 ml-2">FREE</Badge>
                 </CardTitle>
-                <CardDescription className="text-gray-400">Chat with AI for free - ask questions, get help, brainstorm ideas</CardDescription>
+                <CardDescription className="text-gray-400">Ask anything - science, math, coding, history, advice, and more!</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px] pr-4">
