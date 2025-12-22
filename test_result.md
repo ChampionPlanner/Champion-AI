@@ -101,3 +101,60 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: Generation history not displaying on frontend - user reports 0 generations showing
+
+backend:
+  - task: "Generations API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Tested via curl - API returns generations correctly. Data is stored and retrieved properly from MongoDB."
+
+frontend:
+  - task: "History Tab Display"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Tested via Playwright screenshot - History tab displays generations correctly with content preview, date, badges."
+        
+  - task: "Profile My Generations Tab"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Tested via Playwright screenshot - My Generations tab in profile dialog displays generations correctly."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Verified generation history display works locally"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+    - message: "Verified both History tab and Profile > My Generations tab are working correctly in local environment. User's issue may be related to live Vercel deployment not having latest code."
