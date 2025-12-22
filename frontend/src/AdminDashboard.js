@@ -11,14 +11,39 @@ const API = `${BACKEND_URL}/api`;
 export default function AdminDashboard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState(() => localStorage.getItem('admin_token') || "");
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('admin_token'));
-  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [addCreditsUserId, setAddCreditsUserId] = useState("");
   const [addCreditsAmount, setAddCreditsAmount] = useState(10);
+
+  // On mount, check for existing token
+  useEffect(() => {
+    const savedToken = localStorage.getItem('admin_token');
+    if (savedToken) {
+      // Verify the token is still valid
+      verifyToken(savedToken);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const verifyToken = async (savedToken) => {
+    try {
+      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(savedToken)}`);
+      setToken(savedToken);
+      setIsLoggedIn(true);
+      setData(res.data);
+    } catch (e) {
+      // Token invalid - clear it
+      localStorage.removeItem('admin_token');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,16 +51,22 @@ export default function AdminDashboard() {
     setError("");
     try {
       const res = await axios.post(`${API}/admin/login`, {
-        username: username,
+        username: username.trim(),
         password: password
       });
       const newToken = res.data.token;
       setToken(newToken);
       localStorage.setItem('admin_token', newToken);
       setIsLoggedIn(true);
-      fetchDashboard(newToken);
+      
+      // Fetch dashboard data
+      const dashRes = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(newToken)}`);
+      setData(dashRes.data);
+      setError("");
     } catch (e) {
+      console.error("Login error:", e);
       setError(e.response?.data?.detail || "Invalid username or password");
+      setIsLoggedIn(false);
     } finally {
       setLoading(false);
     }
