@@ -217,12 +217,15 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Loading state when logged in but no data */}
-        {!data && !loading && (
+        {/* Loading state */}
+        {(loading || !data) && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <RefreshCw className="h-8 w-8 text-purple-400 animate-spin mx-auto mb-4" />
               <p className="text-gray-400">Loading dashboard data...</p>
+            </div>
+          </div>
+        )}
             </div>
           </div>
         )}
