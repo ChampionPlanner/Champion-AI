@@ -192,9 +192,9 @@ CONTENT_TYPES = {
 
 PRICING_PLANS = {
     "free": {"name": "Free Trial", "credits": 3, "price": 0},
-    "starter": {"name": "Starter", "credits": 50, "price": 9},
-    "pro": {"name": "Pro", "credits": 200, "price": 29},
-    "unlimited": {"name": "Unlimited", "credits": 999999, "price": 49}
+    "starter": {"name": "Starter", "credits": 50, "price": 9.99, "features": ["50 credits/month", "Email support", "All content types"]},
+    "pro": {"name": "Pro", "credits": 200, "price": 29.99, "features": ["200 credits/month", "Priority support", "API access", "Advanced templates"]},
+    "business": {"name": "Business", "credits": 500, "price": 79.99, "features": ["500 credits/month", "Dedicated support", "API access", "Custom templates", "Team features"]}
 }
 
 # =============================================================================
@@ -214,6 +214,10 @@ class User(BaseModel):
     referral_credits_earned: int = 0
     brand_voices: List[Dict] = []
     api_key: Optional[str] = None
+    favorites: List[str] = []  # List of generation IDs
+    last_daily_credit: Optional[str] = None  # Date string of last daily credit claim
+    subscription_id: Optional[str] = None  # Stripe subscription ID
+    subscription_status: Optional[str] = None  # active, canceled, past_due
 
 class UserCreate(BaseModel):
     email: str
