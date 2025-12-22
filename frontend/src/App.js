@@ -273,6 +273,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       setHistory(historyRes.data);
       setBrandVoices(voicesRes.data);
       setReferralInfo(referralRes.data);
+      setFavorites(favoritesRes.data);
+      
+      // Check if daily credit was already claimed today
+      const today = new Date().toISOString().split('T')[0];
+      const userRes = await axios.get(`${API}/users/${user.id}`);
+      setDailyClaimed(userRes.data.last_daily_credit === today);
     } catch (e) {
       console.error(e);
     }
