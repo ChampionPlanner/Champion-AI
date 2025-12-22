@@ -1180,38 +1180,6 @@ const Dashboard = ({ user, setUser, onLogout }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Live Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="bg-slate-900 border-white/10 max-w-6xl h-[80vh]">
-          <button 
-            onClick={() => setShowPreview(false)}
-            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
-          >
-            <X className="h-5 w-5" />
-          </button>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Eye className="text-purple-400" /> Live Preview
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 h-full mt-4">
-            {generatedContent && extractCode(generatedContent) && (
-              <Sandpack
-                template="react"
-                theme="dark"
-                options={{ showNavigator: false, showTabs: true, externalResources: ["https://cdn.tailwindcss.com"] }}
-                files={{
-                  "/App.js": {
-                    code: `${extractCode(generatedContent)}\nexport default function App() { return <div className="p-4">Component Preview</div>; }`,
-                    active: true
-                  }
-                }}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Profile Dialog */}
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-2xl max-h-[80vh] overflow-hidden">
