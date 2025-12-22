@@ -634,6 +634,197 @@ async def get_public_gallery(limit: int = Query(20, le=50), skip: int = Query(0)
     return gallery
 
 # =============================================================================
+# RESUME BUILDER
+# =============================================================================
+class ResumeRequest(BaseModel):
+    user_id: str
+    name: str
+    email: str
+    phone: str = ""
+    location: str = ""
+    linkedin: str = ""
+    summary: str = ""
+    experience: List[Dict] = []  # [{company, title, start_date, end_date, description}]
+    education: List[Dict] = []  # [{school, degree, field, start_date, end_date}]
+    skills: List[str] = []
+    template: str = "modern"  # modern, classic, minimal
+    enhance_with_ai: bool = True
+
+@api_router.post("/generate-resume")
+async def generate_resume(request: ResumeRequest):
+    """Generate a professional resume with AI enhancement"""
+    user = await db.users.find_one({"id": request.user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Build the resume content
+    enhanced_summary = request.summary
+    enhanced_experiences = request.experience
+    
+    # Use AI to enhance content if requested
+    if request.enhance_with_ai and (request.summary or request.experience):
+        try:
+            llm_client = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=str(uuid.uuid4()),
+                system_message="You are a professional resume writer. Enhance the content to be more impactful and professional while keeping it concise. Use action verbs and quantify achievements where possible."
+            )
+            llm_client = llm_client.with_model("openai", "gpt-4o-mini")
+            
+            # Enhance summary
+            if request.summary:
+                summary_prompt = f"Enhance this professional summary to be more impactful (keep it under 100 words):\n\n{request.summary}"
+                user_msg = UserMessage(text=summary_prompt)
+                enhanced_summary = await llm_client.send_message(user_msg)
+            
+            # Enhance experience descriptions
+            for i, exp in enumerate(request.experience):
+                if exp.get('description'):
+                    exp_prompt = f"Enhance this job description with action verbs and impact (keep it under 80 words):\nJob: {exp.get('title')} at {exp.get('company')}\nDescription: {exp.get('description')}"
+                    user_msg = UserMessage(text=exp_prompt)
+                    enhanced_experiences[i]['description'] = await llm_client.send_message(user_msg)
+        except Exception as e:
+            logging.error(f"AI enhancement error: {e}")
+    
+    # Generate HTML resume based on template
+    template_styles = {
+        "modern": {
+            "header_bg": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "accent": "#667eea",
+            "font": "'Poppins', sans-serif"
+        },
+        "classic": {
+            "header_bg": "#2c3e50",
+            "accent": "#2c3e50",
+            "font": "'Georgia', serif"
+        },
+        "minimal": {
+            "header_bg": "#1a1a1a",
+            "accent": "#1a1a1a",
+            "font": "'Inter', sans-serif"
+        }
+    }
+    
+    style = template_styles.get(request.template, template_styles["modern"])
+    
+    # Build experience HTML
+    exp_html = ""
+    for exp in enhanced_experiences:
+        exp_html += f"""
+        <div class="experience-item">
+            <div class="exp-header">
+                <div>
+                    <h3>{exp.get('title', '')}</h3>
+                    <p class="company">{exp.get('company', '')}</p>
+                </div>
+                <span class="dates">{exp.get('start_date', '')} - {exp.get('end_date', 'Present')}</span>
+            </div>
+            <p class="description">{exp.get('description', '')}</p>
+        </div>
+        """
+    
+    # Build education HTML
+    edu_html = ""
+    for edu in request.education:
+        edu_html += f"""
+        <div class="education-item">
+            <div class="edu-header">
+                <div>
+                    <h3>{edu.get('degree', '')} in {edu.get('field', '')}</h3>
+                    <p class="school">{edu.get('school', '')}</p>
+                </div>
+                <span class="dates">{edu.get('start_date', '')} - {edu.get('end_date', '')}</span>
+            </div>
+        </div>
+        """
+    
+    # Build skills HTML
+    skills_html = "".join([f'<span class="skill-tag">{skill}</span>' for skill in request.skills])
+    
+    html_resume = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>{request.name} - Resume</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: {style['font']}; line-height: 1.6; color: #333; background: #f5f5f5; }}
+        .resume {{ max-width: 800px; margin: 20px auto; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }}
+        .header {{ background: {style['header_bg']}; color: white; padding: 40px; text-align: center; }}
+        .header h1 {{ font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }}
+        .header .contact {{ display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 0.9em; opacity: 0.9; }}
+        .header .contact span {{ display: flex; align-items: center; gap: 5px; }}
+        .content {{ padding: 40px; }}
+        .section {{ margin-bottom: 30px; }}
+        .section-title {{ color: {style['accent']}; font-size: 1.3em; font-weight: 600; border-bottom: 2px solid {style['accent']}; padding-bottom: 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }}
+        .summary {{ font-size: 1.05em; color: #555; line-height: 1.8; }}
+        .experience-item, .education-item {{ margin-bottom: 25px; }}
+        .exp-header, .edu-header {{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }}
+        .exp-header h3, .edu-header h3 {{ color: #333; font-size: 1.1em; }}
+        .company, .school {{ color: {style['accent']}; font-weight: 500; }}
+        .dates {{ color: #888; font-size: 0.9em; white-space: nowrap; }}
+        .description {{ color: #555; font-size: 0.95em; }}
+        .skills {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+        .skill-tag {{ background: {style['accent']}15; color: {style['accent']}; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500; }}
+        @media print {{
+            body {{ background: white; }}
+            .resume {{ box-shadow: none; margin: 0; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <div class="header">
+            <h1>{request.name}</h1>
+            <div class="contact">
+                <span>📧 {request.email}</span>
+                {f'<span>📱 {request.phone}</span>' if request.phone else ''}
+                {f'<span>📍 {request.location}</span>' if request.location else ''}
+                {f'<span>💼 {request.linkedin}</span>' if request.linkedin else ''}
+            </div>
+        </div>
+        <div class="content">
+            {f'<div class="section"><h2 class="section-title">Professional Summary</h2><p class="summary">{enhanced_summary}</p></div>' if enhanced_summary else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Experience</h2>{exp_html}</div>' if exp_html else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Education</h2>{edu_html}</div>' if edu_html else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Skills</h2><div class="skills">{skills_html}</div></div>' if skills_html else ''}
+        </div>
+    </div>
+</body>
+</html>
+"""
+    
+    # Save to generations
+    generation = {
+        "id": str(uuid.uuid4()),
+        "user_id": request.user_id,
+        "content_type": "resume",
+        "topic": f"Resume - {request.name}",
+        "generated_content": html_resume,
+        "credits_used": 0,  # Free feature
+        "language": "en",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.generations.insert_one(generation)
+    await db.users.update_one(
+        {"id": request.user_id},
+        {"$push": {"generations": generation["id"]}}
+    )
+    
+    return {
+        "success": True,
+        "html": html_resume,
+        "generation_id": generation["id"]
+    }
+
+# =============================================================================
 # SEO ANALYZER
 # =============================================================================
 @api_router.post("/analyze-seo")
