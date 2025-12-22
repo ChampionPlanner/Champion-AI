@@ -1525,7 +1525,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 };
 
 // Auth Screen with Login/Signup/Forgot Password
-const AuthScreen = ({ onAuth, referralCode }) => {
+const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
   const [mode, setMode] = useState("signup"); // "signup", "login", "forgot", "reset"
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -1533,6 +1533,7 @@ const AuthScreen = ({ onAuth, referralCode }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [referralCodeInput, setReferralCodeInput] = useState(initialReferralCode || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -1562,11 +1563,11 @@ const AuthScreen = ({ onAuth, referralCode }) => {
         email, 
         name, 
         password,
-        referral_code: referralCode || null 
+        referral_code: referralCodeInput.trim() || null 
       });
       localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
       onAuth(res.data);
-      toast.success(referralCode ? "Welcome! You got 5 bonus credits!" : "Welcome to Champion AI Studio!");
+      toast.success(referralCodeInput ? "Welcome! You got 2 bonus credits!" : "Welcome to Champion AI Studio!");
     } catch (e) {
       setError(e.response?.data?.detail || "Failed to create account");
     } finally {
@@ -1670,7 +1671,7 @@ const AuthScreen = ({ onAuth, referralCode }) => {
       case "login": return "Login to access your dashboard";
       case "forgot": return "Enter your email to receive a reset code";
       case "reset": return "Enter the code and your new password";
-      default: return referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "Sign up and get 3 free credits";
+      default: return initialReferralCode || referralCodeInput ? "🎁 You've been referred! Get bonus credits!" : "Sign up and get 3 free credits";
     }
   };
 
@@ -1737,6 +1738,19 @@ const AuthScreen = ({ onAuth, referralCode }) => {
                     className="bg-white/5 border-white/10 text-white pl-10" 
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Referral Code <span className="text-gray-500">(optional)</span></Label>
+                <div className="relative">
+                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    placeholder="Enter referral code for bonus credits" 
+                    value={referralCodeInput} 
+                    onChange={(e) => setReferralCodeInput(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Get 2 bonus credits when you sign up with a referral code!</p>
               </div>
               {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
             </CardContent>

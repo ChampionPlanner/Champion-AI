@@ -56,21 +56,25 @@ export default function AdminDashboard() {
   };
 
   const fetchDashboard = async (authToken = token) => {
-    if (!authToken) return;
+    if (!authToken) {
+      setIsLoggedIn(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(authToken)}`);
       setData(res.data);
       setError("");
     } catch (e) {
+      // Any error - clear token and show login
+      localStorage.removeItem('admin_token');
+      setToken("");
+      setIsLoggedIn(false);
+      setData(null);
       if (e.response?.status === 401) {
-        // Token expired or invalid
-        localStorage.removeItem('admin_token');
-        setToken("");
-        setIsLoggedIn(false);
         setError("Session expired. Please login again.");
       } else {
-        setError("Failed to load dashboard");
+        setError("Connection error. Please login again.");
       }
     } finally {
       setLoading(false);
@@ -80,6 +84,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isLoggedIn && token) {
       fetchDashboard();
+    } else {
+      // No valid token, ensure we show login screen
+      setIsLoggedIn(false);
+      setLoading(false);
     }
   }, []);
 
@@ -209,6 +217,15 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Loading state */}
+        {(loading || !data) && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <RefreshCw className="h-8 w-8 text-purple-400 animate-spin mx-auto mb-4" />
+              <p className="text-gray-400">Loading dashboard data...</p>
+            </div>
+          </div>
+        )}
         {/* Overview Cards */}
         {data && (
           <>
