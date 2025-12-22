@@ -1124,15 +1124,18 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   );
 };
 
-// Auth Screen with Login/Signup
+// Auth Screen with Login/Signup/Forgot Password
 const AuthScreen = ({ onAuth, referralCode }) => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [mode, setMode] = useState("signup"); // "signup", "login", "forgot", "reset"
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -1193,26 +1196,97 @@ const AuthScreen = ({ onAuth, referralCode }) => {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    
+    if (!email.trim()) {
+      setError("Please enter your email");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/forgot-password`, { email });
+      setSuccessMsg("Reset code sent! Check below (in production this would be emailed)");
+      // For demo purposes, show the code - remove in production
+      if (res.data.code) {
+        setResetCode(res.data.code);
+      }
+      setMode("reset");
+      toast.success("Reset code generated!");
+    } catch (e) {
+      setError(e.response?.data?.detail || "Failed to send reset code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    
+    if (!resetCode.trim() || !newPassword.trim()) {
+      setError("Please enter the reset code and new password");
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(`${API}/reset-password`, { 
+        email, 
+        token: resetCode, 
+        new_password: newPassword 
+      });
+      toast.success("Password reset successfully! Please login.");
+      setMode("login");
+      setPassword("");
+      setResetCode("");
+      setNewPassword("");
+    } catch (e) {
+      setError(e.response?.data?.detail || "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Welcome Back";
+      case "forgot": return "Forgot Password";
+      case "reset": return "Reset Password";
+      default: return "Create Account";
+    }
+  };
+
+  const getDescription = () => {
+    switch (mode) {
+      case "login": return "Login to access your dashboard";
+      case "forgot": return "Enter your email to receive a reset code";
+      case "reset": return "Enter the code and your new password";
+      default: return referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "Sign up and get 3 free credits";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white/5 border-white/10">
         <CardHeader className="text-center">
           <Sparkles className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-          <CardTitle className="text-2xl text-white">
-            {isLogin ? "Welcome Back" : "Create Account"}
-          </CardTitle>
-          <CardDescription className="text-gray-400">
-            {isLogin 
-              ? "Login to access your dashboard" 
-              : referralCode 
-                ? "🎁 You've been referred! Get 5 bonus credits!" 
-                : "Sign up and get 3 free credits"
-            }
-          </CardDescription>
+          <CardTitle className="text-2xl text-white">{getTitle()}</CardTitle>
+          <CardDescription className="text-gray-400">{getDescription()}</CardDescription>
         </CardHeader>
-        <form onSubmit={isLogin ? handleLogin : handleSignup}>
-          <CardContent className="space-y-4">
-            {!isLogin && (
+        
+        {/* Signup Form */}
+        {mode === "signup" && (
+          <form onSubmit={handleSignup}>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-gray-300">Name</Label>
                 <div className="relative">
@@ -1225,34 +1299,32 @@ const AuthScreen = ({ onAuth, referralCode }) => {
                   />
                 </div>
               </div>
-            )}
-            <div className="space-y-2">
-              <Label className="text-gray-300">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="email" 
-                  placeholder="john@example.com" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  className="bg-white/5 border-white/10 text-white pl-10" 
-                />
+              <div className="space-y-2">
+                <Label className="text-gray-300">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-300">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  className="bg-white/5 border-white/10 text-white pl-10" 
-                />
+              <div className="space-y-2">
+                <Label className="text-gray-300">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
               </div>
-            </div>
-            {!isLogin && (
               <div className="space-y-2">
                 <Label className="text-gray-300">Confirm Password</Label>
                 <div className="relative">
@@ -1266,28 +1338,147 @@ const AuthScreen = ({ onAuth, referralCode }) => {
                   />
                 </div>
               </div>
-            )}
-            {error && (
-              <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>
-            )}
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-              {isLogin ? "Login" : "Create Account"}
-            </Button>
-            <p className="text-gray-400 text-sm text-center">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button 
-                type="button"
-                onClick={() => { setIsLogin(!isLogin); setError(""); }}
-                className="text-purple-400 hover:text-purple-300 font-medium"
-              >
-                {isLogin ? "Sign up" : "Login"}
+              {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Create Account
+              </Button>
+              <p className="text-gray-400 text-sm text-center">
+                Already have an account?{" "}
+                <button type="button" onClick={() => { setMode("login"); setError(""); }} className="text-purple-400 hover:text-purple-300 font-medium">
+                  Login
+                </button>
+              </p>
+            </CardFooter>
+          </form>
+        )}
+
+        {/* Login Form */}
+        {mode === "login" && (
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-gray-300">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+              {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Login
+              </Button>
+              <div className="flex flex-col gap-2 text-center">
+                <button type="button" onClick={() => { setMode("forgot"); setError(""); }} className="text-purple-400 hover:text-purple-300 text-sm">
+                  Forgot password?
+                </button>
+                <p className="text-gray-400 text-sm">
+                  Don't have an account?{" "}
+                  <button type="button" onClick={() => { setMode("signup"); setError(""); }} className="text-purple-400 hover:text-purple-300 font-medium">
+                    Sign up
+                  </button>
+                </p>
+              </div>
+            </CardFooter>
+          </form>
+        )}
+
+        {/* Forgot Password Form */}
+        {mode === "forgot" && (
+          <form onSubmit={handleForgotPassword}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-gray-300">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+              {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
+              {successMsg && <p className="text-green-400 text-sm bg-green-500/10 p-3 rounded-lg">{successMsg}</p>}
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Send Reset Code
+              </Button>
+              <button type="button" onClick={() => { setMode("login"); setError(""); setSuccessMsg(""); }} className="text-purple-400 hover:text-purple-300 text-sm">
+                Back to Login
               </button>
-            </p>
-          </CardFooter>
-        </form>
+            </CardFooter>
+          </form>
+        )}
+
+        {/* Reset Password Form */}
+        {mode === "reset" && (
+          <form onSubmit={handleResetPassword}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-gray-300">Reset Code</Label>
+                <Input 
+                  placeholder="Enter 6-digit code" 
+                  value={resetCode} 
+                  onChange={(e) => setResetCode(e.target.value)} 
+                  className="bg-white/5 border-white/10 text-white text-center text-lg tracking-widest" 
+                  maxLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">New Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={newPassword} 
+                    onChange={(e) => setNewPassword(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+              </div>
+              {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Reset Password
+              </Button>
+              <button type="button" onClick={() => { setMode("forgot"); setError(""); }} className="text-purple-400 hover:text-purple-300 text-sm">
+                Resend Code
+              </button>
+            </CardFooter>
+          </form>
+        )}
       </Card>
     </div>
   );
