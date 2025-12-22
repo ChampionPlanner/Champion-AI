@@ -17,7 +17,7 @@ import {
   Sparkles, FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Zap, Copy, History,
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
-  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock
+  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
