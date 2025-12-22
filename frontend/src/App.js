@@ -571,7 +571,13 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-300">Brand Voice</Label>
-                      <Select value={selectedBrandVoice} onValueChange={setSelectedBrandVoice}>
+                      <Select value={selectedBrandVoice} onValueChange={(val) => {
+                        if (val === "add_new") {
+                          setShowBrandVoice(true);
+                        } else {
+                          setSelectedBrandVoice(val);
+                        }
+                      }}>
                         <SelectTrigger className="bg-white/5 border-white/10 text-white">
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
@@ -580,6 +586,11 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                           {brandVoices.map((voice) => (
                             <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
                           ))}
+                          <SelectItem value="add_new" className="text-purple-400">
+                            <span className="flex items-center gap-1">
+                              <Plus className="h-3 w-3" /> Add Brand Voice
+                            </span>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
