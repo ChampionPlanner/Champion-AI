@@ -645,6 +645,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
               <RefreshCw className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Repurpose</span>
             </TabsTrigger>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <Star className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Favorites</span>
+            </TabsTrigger>
             <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
               <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
             </TabsTrigger>
