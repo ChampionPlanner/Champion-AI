@@ -1525,7 +1525,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 };
 
 // Auth Screen with Login/Signup/Forgot Password
-const AuthScreen = ({ onAuth, referralCode }) => {
+const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
   const [mode, setMode] = useState("signup"); // "signup", "login", "forgot", "reset"
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -1533,6 +1533,7 @@ const AuthScreen = ({ onAuth, referralCode }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [referralCodeInput, setReferralCodeInput] = useState(initialReferralCode || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
