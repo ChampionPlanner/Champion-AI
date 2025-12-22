@@ -228,6 +228,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [showBulk, setShowBulk] = useState(false);
   const [showRepurpose, setShowRepurpose] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [referralInfo, setReferralInfo] = useState(null);
   const [brandVoices, setBrandVoices] = useState([]);
   const [selectedBrandVoice, setSelectedBrandVoice] = useState("none");
@@ -239,6 +240,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageStyle, setImageStyle] = useState("realistic");
   const [activeTab, setActiveTab] = useState("generate");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [profileTab, setProfileTab] = useState("info");
 
   const fetchData = useCallback(async () => {
     try {
@@ -472,10 +476,10 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <Button variant="ghost" size="sm" onClick={() => setShowApiKey(true)} className="text-gray-300 px-2 hidden md:flex">
               <Key className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2 text-gray-300 ml-1 md:ml-2 hidden md:flex">
+            <Button variant="ghost" size="sm" onClick={() => setShowProfile(true)} className="text-gray-300 px-2 flex items-center gap-1">
               <User className="h-4 w-4" />
               <span className="text-sm hidden md:inline">{user.name}</span>
-            </div>
+            </Button>
             <Button variant="ghost" size="icon" onClick={onLogout} className="text-gray-400">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -1118,6 +1122,218 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               />
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Profile Dialog */}
+      <Dialog open={showProfile} onOpenChange={setShowProfile}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <User className="text-purple-400" /> My Profile
+            </DialogTitle>
+          </DialogHeader>
+          
+          {/* Profile Tabs */}
+          <div className="flex gap-2 mt-4 border-b border-white/10 pb-2">
+            {["info", "history", "security"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setProfileTab(tab)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  profileTab === tab 
+                    ? 'bg-purple-500 text-white' 
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {tab === "info" ? "Account Info" : tab === "history" ? "My Generations" : "Security"}
+              </button>
+            ))}
+          </div>
+
+          <ScrollArea className="h-[400px] mt-4">
+            {/* Account Info Tab */}
+            {profileTab === "info" && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <Label className="text-gray-400 text-sm">Name</Label>
+                    <p className="text-white text-lg font-medium mt-1">{user.name}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <Label className="text-gray-400 text-sm">Email</Label>
+                    <p className="text-white text-lg font-medium mt-1">{user.email}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-white/5 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-purple-400">{user.credits}</div>
+                    <div className="text-gray-400 text-sm">Credits</div>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-blue-400">{history.length}</div>
+                    <div className="text-gray-400 text-sm">Generations</div>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-green-400 capitalize">{user.plan}</div>
+                    <div className="text-gray-400 text-sm">Plan</div>
+                  </div>
+                </div>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <Label className="text-gray-400 text-sm">Member Since</Label>
+                  <p className="text-white mt-1">{new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </div>
+                {user.referral_code && (
+                  <div className="p-4 bg-white/5 rounded-lg">
+                    <Label className="text-gray-400 text-sm">Your Referral Code</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input value={user.referral_code} readOnly className="bg-white/5 border-white/10 text-white" />
+                      <Button onClick={() => copyToClipboard(user.referral_code)} size="sm"><Copy className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Generation History Tab */}
+            {profileTab === "history" && (
+              <div className="space-y-3">
+                {history.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No generations yet</p>
+                    <p className="text-sm mt-2">Start creating content to see your history here</p>
+                  </div>
+                ) : (
+                  history.map((item) => (
+                    <div key={item.id} className="p-4 bg-white/5 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">{contentTypes[item.content_type]?.name || item.content_type}</Badge>
+                            {item.image_url && <Badge className="bg-purple-500 text-xs">Image</Badge>}
+                            <span className="text-gray-500 text-xs">{item.credits_used} credits</span>
+                          </div>
+                          <h4 className="text-white font-medium">{item.topic}</h4>
+                          <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                            {item.image_url ? "AI Generated Image" : item.generated_content?.slice(0, 150)}...
+                          </p>
+                          <p className="text-gray-500 text-xs mt-2">
+                            {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        {item.image_url && (
+                          <img src={item.image_url} alt={item.topic} className="w-16 h-16 rounded-lg object-cover ml-4" />
+                        )}
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            copyToClipboard(item.image_url || item.generated_content);
+                          }}
+                          className="text-xs"
+                        >
+                          <Copy className="h-3 w-3 mr-1" /> Copy
+                        </Button>
+                        {item.image_url && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => window.open(item.image_url, '_blank')}
+                            className="text-xs"
+                          >
+                            <Download className="h-3 w-3 mr-1" /> Download
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Security Tab */}
+            {profileTab === "security" && (
+              <div className="space-y-4">
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h3 className="text-white font-medium mb-4">Change Password</h3>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Current Password</Label>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter current password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">New Password</Label>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white"
+                      />
+                    </div>
+                    <Button 
+                      className="w-full bg-purple-500 hover:bg-purple-600"
+                      onClick={async () => {
+                        if (!currentPassword || !newPassword) {
+                          toast.error("Please fill in both fields");
+                          return;
+                        }
+                        if (newPassword.length < 6) {
+                          toast.error("New password must be at least 6 characters");
+                          return;
+                        }
+                        try {
+                          // First verify current password by logging in
+                          await axios.post(`${API}/login`, { email: user.email, password: currentPassword });
+                          // Then request password reset
+                          const resetRes = await axios.post(`${API}/forgot-password`, { email: user.email });
+                          // Use the code to reset
+                          await axios.post(`${API}/reset-password`, { 
+                            email: user.email, 
+                            token: resetRes.data.code, 
+                            new_password: newPassword 
+                          });
+                          toast.success("Password changed successfully!");
+                          setCurrentPassword("");
+                          setNewPassword("");
+                        } catch (e) {
+                          toast.error(e.response?.data?.detail || "Failed to change password. Check your current password.");
+                        }
+                      }}
+                    >
+                      Update Password
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h3 className="text-white font-medium mb-2">Account Actions</h3>
+                  <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to logout?")) {
+                        onLogout();
+                        setShowProfile(false);
+                      }
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" /> Logout
+                  </Button>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
