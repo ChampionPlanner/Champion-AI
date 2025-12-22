@@ -640,16 +640,19 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               <Sparkles className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Generate</span>
             </TabsTrigger>
             <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <Image className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">AI Image</span>
+              <Image className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Image</span>
             </TabsTrigger>
-            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <RefreshCw className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Repurpose</span>
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <RefreshCw className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Repurpose</span>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <Star className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Favorites</span>
+            <TabsTrigger value="seo" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <Search className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">SEO</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <Star className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Saved</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <History className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">History</span>
             </TabsTrigger>
           </TabsList>
 
