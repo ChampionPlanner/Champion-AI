@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champion AI Studio - Marketing Ad</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #1e1b4b 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .image-container {
+            max-width: 900px;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(255,255,255,0.1);
+            padding: 4px;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+        }
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .tagline {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ Champion AI Studio Marketing Ad</h1>
+    <div class="image-container">
+        <img id="adImage" src="" alt="Champion AI Studio Marketing Ad" />
+    </div>
+    <p class="tagline">AI-Powered Content & Design Generation Platform</p>
+    <div class="actions">
+        <a href="#" class="btn btn-primary" id="downloadBtn">⬇️ Download Image</a>
+        <a href="/" class="btn btn-secondary">← Back to App</a>
+    </div>
+
+    <script>
+        // Fetch the image from the API
+        fetch('/api/generations/338f51f8-201f-431a-92d0-d0ca2619a869')
+            .then(res => res.json())
+            .then(data => {
+                // Find the image generation
+                const imageGen = data.find(g => g.image_url && g.id === '138eb205-7506-46b3-a3e9-bbd840b06211');
+                if (imageGen) {
+                    document.getElementById('adImage').src = imageGen.image_url;
+                    
+                    // Setup download button
+                    document.getElementById('downloadBtn').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const link = document.createElement('a');
+                        link.href = imageGen.image_url;
+                        link.download = 'champion-ai-studio-ad.png';
+                        link.click();
+                    });
+                }
+            })
+            .catch(err => console.error('Error loading image:', err));
+    </script>
+</body>
+</html>
