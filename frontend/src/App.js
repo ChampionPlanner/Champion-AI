@@ -17,7 +17,7 @@ import {
   Sparkles, FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Zap, Copy, History,
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
-  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock
+  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
@@ -897,6 +897,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Pricing Dialog */}
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-4xl">
+          <button 
+            onClick={() => setShowPricing(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Purchase Credits</DialogTitle>
             <DialogDescription className="text-gray-400">Secure payment via PayPal</DialogDescription>
@@ -927,6 +933,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Referral Dialog */}
       <Dialog open={showReferral} onOpenChange={setShowReferral}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowReferral(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl flex items-center gap-2">
               <Gift className="text-purple-400" /> Referral Program
@@ -960,6 +972,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* API Key Dialog */}
       <Dialog open={showApiKey} onOpenChange={setShowApiKey}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowApiKey(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl flex items-center gap-2">
               <Key className="text-purple-400" /> API Access
@@ -993,6 +1011,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Templates Dialog */}
       <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-2xl">
+          <button 
+            onClick={() => setShowTemplates(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Templates Library</DialogTitle>
           </DialogHeader>
@@ -1033,6 +1057,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Bulk Generation Dialog */}
       <Dialog open={showBulk} onOpenChange={setShowBulk}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowBulk(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Bulk Generation</DialogTitle>
             <DialogDescription className="text-gray-400">Generate content for multiple topics at once (max 20)</DialogDescription>
@@ -1064,6 +1094,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Brand Voice Dialog */}
       <Dialog open={showBrandVoice} onOpenChange={setShowBrandVoice}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowBrandVoice(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Brand Voices</DialogTitle>
             <DialogDescription className="text-gray-400">Save your brand's tone for consistent content</DialogDescription>
@@ -1102,6 +1138,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Live Preview Dialog */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-6xl h-[80vh]">
+          <button 
+            onClick={() => setShowPreview(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Eye className="text-purple-400" /> Live Preview
@@ -1128,6 +1170,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Profile Dialog */}
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-2xl max-h-[80vh] overflow-hidden">
+          <button 
+            onClick={() => setShowProfile(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl flex items-center gap-2">
               <User className="text-purple-400" /> My Profile
