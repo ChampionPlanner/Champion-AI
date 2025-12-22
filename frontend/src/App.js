@@ -165,14 +165,14 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
         {/* Pricing */}
         <div className="mt-32">
           <h2 className="text-4xl font-bold text-white text-center mb-4">Simple Pricing</h2>
-          <p className="text-gray-400 text-center mb-12">Choose the plan that works for you</p>
+          <p className="text-gray-400 text-center mb-12">Start free, upgrade when you need more</p>
           
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
-              { name: "Free", price: "$0", credits: "3", features: ["All content types", "20+ languages", "Basic support"] },
-              { name: "Starter", price: "$9", credits: "50", features: ["Everything in Free", "Brand voices", "Templates"] },
-              { name: "Pro", price: "$29", credits: "200", features: ["Everything in Starter", "Bulk generation", "API access"], popular: true },
-              { name: "Unlimited", price: "$49/mo", credits: "∞", features: ["Everything in Pro", "Priority support", "Custom templates"] }
+              { name: "Free", price: "$0", credits: "3", features: ["Ask AI (unlimited)", "Resume Builder", "SEO Analyzer", "Daily free credit", "All content types"] },
+              { name: "Starter", price: "$9.99", credits: "50", features: ["Everything in Free", "50 credits/month", "Brand voices", "Email support"] },
+              { name: "Pro", price: "$29.99", credits: "200", features: ["Everything in Starter", "200 credits/month", "API access", "Priority support"], popular: true },
+              { name: "Business", price: "$79.99", credits: "500", features: ["Everything in Pro", "500 credits/month", "Team features", "Dedicated support"] }
             ].map((plan, i) => (
               <Card key={i} className={`relative ${plan.popular ? 'border-purple-500 bg-purple-500/10' : 'bg-white/5 border-white/10'}`}>
                 {plan.popular && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500"><Star className="h-3 w-3 mr-1" /> Popular</Badge>}
