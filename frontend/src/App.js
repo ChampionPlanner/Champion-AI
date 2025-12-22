@@ -1739,6 +1739,19 @@ const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Referral Code <span className="text-gray-500">(optional)</span></Label>
+                <div className="relative">
+                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input 
+                    placeholder="Enter referral code for bonus credits" 
+                    value={referralCodeInput} 
+                    onChange={(e) => setReferralCodeInput(e.target.value)} 
+                    className="bg-white/5 border-white/10 text-white pl-10" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Get 2 bonus credits when you sign up with a referral code!</p>
+              </div>
               {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">{error}</p>}
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
