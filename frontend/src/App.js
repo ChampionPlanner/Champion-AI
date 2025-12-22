@@ -255,6 +255,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [seoKeyword, setSeoKeyword] = useState("");
   const [seoResult, setSeoResult] = useState(null);
   const [dailyClaimed, setDailyClaimed] = useState(false);
+  const [resumeData, setResumeData] = useState({
+    name: "", email: "", phone: "", location: "", linkedin: "",
+    summary: "", experience: [], education: [], skills: [], template: "modern"
+  });
+  const [resumeHtml, setResumeHtml] = useState("");
+  const [resumeGenerating, setResumeGenerating] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
