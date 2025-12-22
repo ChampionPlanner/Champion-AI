@@ -1286,7 +1286,8 @@ async def admin_dashboard(token: str = Query(...)):
             "referred_by": u.get('referred_by'),
             "referral_credits": u.get('referral_credits_earned', 0),
             "created_at": u.get('created_at')
-        } for u in users]
+        } for u in users],
+        "chat_logs": await db.chat_logs.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     }
 
 @api_router.post("/admin/add-credits")
