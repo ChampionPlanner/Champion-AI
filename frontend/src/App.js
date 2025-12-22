@@ -1650,6 +1650,144 @@ const Dashboard = ({ user, setUser, onLogout }) => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      {/* Gallery Dialog */}
+      <Dialog open={showGallery} onOpenChange={setShowGallery}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-4xl max-h-[80vh] overflow-hidden">
+          <button 
+            onClick={() => setShowGallery(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Globe className="text-purple-400" /> Public Gallery
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Explore content created by the community</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[500px] mt-4">
+            {gallery.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No public content yet</p>
+                <p className="text-sm">Be the first to share!</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {gallery.map((item) => (
+                  <Card key={item.id} className="bg-white/5 border-white/10">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-white text-lg">{item.topic}</CardTitle>
+                          <CardDescription className="text-gray-500">by {item.author_name}</CardDescription>
+                        </div>
+                        <Badge className="bg-purple-500/20 text-purple-300">{item.content_type}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.topic} className="w-full h-40 object-cover rounded" />
+                      ) : (
+                        <p className="text-gray-400 text-sm line-clamp-4">{item.generated_content}</p>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
+                        <Copy className="h-4 w-4 mr-1" /> Copy
+                      </Button>
+                      {!item.image_url && (
+                        <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                          <Twitter className="h-4 w-4 mr-1" /> Tweet
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* SEO Analyzer Dialog */}
+      <Dialog open={showSeoAnalyzer} onOpenChange={setShowSeoAnalyzer}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-2xl">
+          <button 
+            onClick={() => setShowSeoAnalyzer(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Search className="text-purple-400" /> SEO Analyzer
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Check your content's SEO score</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label className="text-gray-300">Target Keyword</Label>
+              <Input 
+                placeholder="e.g., digital marketing"
+                value={seoKeyword}
+                onChange={(e) => setSeoKeyword(e.target.value)}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-300">Content to Analyze</Label>
+              <textarea 
+                placeholder="Paste your content here..."
+                value={seoContent}
+                onChange={(e) => setSeoContent(e.target.value)}
+                className="w-full h-32 p-3 bg-white/5 border border-white/10 rounded-lg text-white resize-none"
+              />
+            </div>
+            <Button onClick={analyzeSeo} className="w-full bg-purple-500 hover:bg-purple-600">
+              <Search className="h-4 w-4 mr-2" /> Analyze SEO
+            </Button>
+            
+            {seoResult && (
+              <div className="p-4 bg-white/5 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-bold text-2xl">Score: {seoResult.score}/100</span>
+                  <Badge className={seoResult.score >= 75 ? "bg-green-500" : seoResult.score >= 50 ? "bg-yellow-500" : "bg-red-500"}>
+                    {seoResult.verdict}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.word_count}</p>
+                    <p className="text-xs text-gray-400">Words</p>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.keyword_count}</p>
+                    <p className="text-xs text-gray-400">Keywords</p>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.keyword_density}%</p>
+                    <p className="text-xs text-gray-400">Density</p>
+                  </div>
+                </div>
+                {seoResult.suggestions.length > 0 && (
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Suggestions:</p>
+                    <ul className="space-y-1">
+                      {seoResult.suggestions.map((s, i) => (
+                        <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                          <span className="text-yellow-400">•</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
