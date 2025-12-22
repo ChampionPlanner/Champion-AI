@@ -1231,18 +1231,24 @@ async def admin_add_credits(
     credits: int = Query(...),
     token: str = Query(...)
 ):
-    """Add credits to a user (admin only)"""
+    """Add credits to a user (admin only) - accepts user_id or email"""
     verify_admin_token(token)
     
+    # Try to find user by ID first, then by email
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        # Try finding by email
+        user = await db.users.find_one({"email": user_id}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found. Enter a valid User ID or Email.")
+    
     result = await db.users.update_one(
-        {"id": user_id},
+        {"id": user["id"]},
         {"$inc": {"credits": credits}}
     )
     
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return {"success": True, "message": f"Added {credits} credits to user {user_id}"}
+    return {"success": True, "message": f"Added {credits} credits to {user['name']} ({user['email']})"}
 
 @api_router.delete("/admin/user/{user_id}")
 async def admin_delete_user(user_id: str, token: str = Query(...)):
