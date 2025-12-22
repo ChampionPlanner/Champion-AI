@@ -640,18 +640,29 @@ class ChatRequest(BaseModel):
 
 @api_router.post("/chat")
 async def chat_with_ai(request: ChatRequest):
-    """Free AI chat - no credits required"""
+    """Free AI chat - like ChatGPT, answers any real-world question"""
     user = await db.users.find_one({"id": request.user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Build conversation history
+    # Build conversation history for context
     messages_text = ""
-    for msg in request.history[-10:]:  # Last 10 messages for context
+    for msg in request.history[-10:]:
         role = "User" if msg.get("role") == "user" else "Assistant"
         messages_text += f"{role}: {msg.get('content', '')}\n"
     
-    prompt = f"""{messages_text}User: {request.message}
+    # Simple prompt - just the conversation
+    if messages_text:
+        prompt = f"{messages_text}User: {request.message}"
+    else:
+        prompt = request.message
+
+    try:
+        llm_client = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=str(uuid.uuid4()),
+            system_message="You are a highly knowledgeable AI assistant, similar to ChatGPT. You can answer any question about any topic - science, history, math, coding, creative writing, philosophy, current events, recipes, health, finance, relationships, and everything else. Be helpful, accurate, thorough, and engaging. If you don't know something, say so honestly. Format your responses nicely with bullet points or numbered lists when appropriate."
+        )
         llm_client = llm_client.with_model("openai", "gpt-4o-mini")
         
         user_msg = UserMessage(text=prompt)
