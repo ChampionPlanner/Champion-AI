@@ -632,14 +632,14 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-5 h-auto">
-            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <MessageCircle className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Ask AI</span>
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-7 h-auto">
+            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <MessageCircle className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Ask AI</span>
             </TabsTrigger>
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <Sparkles className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Generate</span>
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+              <Sparkles className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Generate</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
               <Image className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">AI Image</span>
             </TabsTrigger>
             <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
