@@ -1124,6 +1124,140 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* SEO Analyzer Tab */}
+          <TabsContent value="seo" className="space-y-6">
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Search className="h-5 w-5 text-purple-400" /> SEO Content Analyzer
+                </CardTitle>
+                <CardDescription className="text-gray-400">Check your content's SEO score and get improvement tips</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Target Keyword</Label>
+                  <Input 
+                    placeholder="e.g., digital marketing tips"
+                    value={seoKeyword}
+                    onChange={(e) => setSeoKeyword(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Content to Analyze</Label>
+                  <textarea 
+                    placeholder="Paste your blog post, article, or any content here..."
+                    value={seoContent}
+                    onChange={(e) => setSeoContent(e.target.value)}
+                    className="w-full h-48 p-3 bg-white/5 border border-white/10 rounded-lg text-white resize-none"
+                  />
+                </div>
+                <Button onClick={analyzeSeo} className="w-full bg-gradient-to-r from-purple-500 to-pink-500">
+                  <Search className="h-4 w-4 mr-2" /> Analyze SEO Score
+                </Button>
+                
+                {seoResult && (
+                  <div className="mt-6 p-6 bg-white/5 rounded-lg space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-gray-400 text-sm">SEO Score</p>
+                        <span className="text-4xl font-bold text-white">{seoResult.score}<span className="text-xl text-gray-400">/100</span></span>
+                      </div>
+                      <Badge className={`text-lg px-4 py-2 ${seoResult.score >= 75 ? "bg-green-500" : seoResult.score >= 50 ? "bg-yellow-500" : "bg-red-500"}`}>
+                        {seoResult.verdict}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.word_count}</p>
+                        <p className="text-xs text-gray-400">Total Words</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.keyword_count}</p>
+                        <p className="text-xs text-gray-400">Keyword Uses</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.keyword_density}%</p>
+                        <p className="text-xs text-gray-400">Keyword Density</p>
+                      </div>
+                    </div>
+                    {seoResult.suggestions.length > 0 && (
+                      <div className="pt-4 border-t border-white/10">
+                        <p className="text-white font-medium mb-3">💡 Improvement Suggestions:</p>
+                        <ul className="space-y-2">
+                          {seoResult.suggestions.map((s, i) => (
+                            <li key={i} className="text-gray-300 text-sm flex items-start gap-2 bg-white/5 p-3 rounded">
+                              <span className="text-yellow-400">→</span> {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Favorites Tab */}
+          <TabsContent value="favorites">
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-400" /> Saved Favorites
+                </CardTitle>
+                <CardDescription className="text-gray-400">Your starred content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {favorites.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No favorites yet</p>
+                    <p className="text-sm">Star your best generations to save them here</p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {favorites.map((item) => (
+                      <Card key={item.id} className="bg-black/20 border-white/10">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-white text-lg">{item.topic}</CardTitle>
+                              <CardDescription className="text-gray-500 text-xs">
+                                {new Date(item.created_at).toLocaleString()}
+                              </CardDescription>
+                            </div>
+                            <Badge className="bg-purple-500/20 text-purple-300">{item.content_type}</Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.topic} className="w-full h-32 object-cover rounded" />
+                          ) : (
+                            <p className="text-gray-400 text-sm line-clamp-3">{item.generated_content}</p>
+                          )}
+                        </CardContent>
+                        <CardFooter className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
+                            <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => toggleFavorite(item.id)} className="text-yellow-400">
+                            <Star className="h-4 w-4" fill="currentColor" /> Remove
+                          </Button>
+                          {!item.image_url && (
+                            <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                              <Twitter className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* History Tab */}
           <TabsContent value="history">
             <Card className="bg-white/5 border-white/10">
