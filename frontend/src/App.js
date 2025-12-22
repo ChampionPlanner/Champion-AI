@@ -442,6 +442,31 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     }
   };
 
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return;
+    
+    const userMessage = { role: "user", content: chatInput };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput("");
+    setChatLoading(true);
+    
+    try {
+      const res = await axios.post(`${API}/chat`, {
+        user_id: user.id,
+        message: chatInput,
+        history: chatMessages.slice(-10) // Send last 10 messages for context
+      });
+      
+      const aiMessage = { role: "assistant", content: res.data.response };
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (e) {
+      toast.error("Failed to get response");
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't process your request. Please try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied!");
