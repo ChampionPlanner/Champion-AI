@@ -711,23 +711,26 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-7 h-auto">
-            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <MessageCircle className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Ask AI</span>
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 md:grid-cols-8 h-auto gap-1">
+            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <MessageCircle className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Ask AI</span>
             </TabsTrigger>
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <Sparkles className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Generate</span>
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Sparkles className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Generate</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <Image className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Image</span>
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Image className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Image</span>
             </TabsTrigger>
-            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <RefreshCw className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Repurpose</span>
+            <TabsTrigger value="resume" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Briefcase className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Resume</span>
             </TabsTrigger>
-            <TabsTrigger value="seo" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <Search className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">SEO</span>
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <RefreshCw className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Repurpose</span>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
+            <TabsTrigger value="seo" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Search className="h-4 w-4" /> <span className="hidden lg:inline ml-1">SEO</span>
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
               <Star className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Saved</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
