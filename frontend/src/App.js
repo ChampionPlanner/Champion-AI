@@ -1671,7 +1671,7 @@ const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
       case "login": return "Login to access your dashboard";
       case "forgot": return "Enter your email to receive a reset code";
       case "reset": return "Enter the code and your new password";
-      default: return referralCode ? "🎁 You've been referred! Get 5 bonus credits!" : "Sign up and get 3 free credits";
+      default: return initialReferralCode || referralCodeInput ? "🎁 You've been referred! Get bonus credits!" : "Sign up and get 3 free credits";
     }
   };
 
