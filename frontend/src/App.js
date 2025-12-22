@@ -17,7 +17,8 @@ import {
   Sparkles, FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Zap, Copy, History,
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
-  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft
+  ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft,
+  MessageCircle, Send
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
@@ -243,6 +244,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [profileTab, setProfileTab] = useState("info");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -438,6 +442,31 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     }
   };
 
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return;
+    
+    const userMessage = { role: "user", content: chatInput };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput("");
+    setChatLoading(true);
+    
+    try {
+      const res = await axios.post(`${API}/chat`, {
+        user_id: user.id,
+        message: chatInput,
+        history: chatMessages.slice(-10) // Send last 10 messages for context
+      });
+      
+      const aiMessage = { role: "assistant", content: res.data.response };
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (e) {
+      toast.error("Failed to get response");
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't process your request. Please try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied!");
@@ -489,7 +518,10 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 h-auto">
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-5 h-auto">
+            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <MessageCircle className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Ask AI</span>
+            </TabsTrigger>
             <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
               <Sparkles className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Generate</span>
             </TabsTrigger>
@@ -503,6 +535,70 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Ask AI Chat Tab */}
+          <TabsContent value="chat" className="space-y-6">
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-purple-400" /> Ask AI Anything
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 ml-2">FREE</Badge>
+                </CardTitle>
+                <CardDescription className="text-gray-400">Ask anything - science, math, coding, history, advice, and more!</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px] pr-4">
+                  {chatMessages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                      <MessageCircle className="h-12 w-12 mb-4 opacity-50" />
+                      <p className="text-center">Start a conversation!</p>
+                      <p className="text-sm text-center mt-2 text-gray-600">Science, math, history, coding, recipes, advice - I know it all!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {chatMessages.map((msg, i) => (
+                        <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[80%] p-3 rounded-lg ${
+                            msg.role === 'user' 
+                              ? 'bg-purple-500 text-white' 
+                              : 'bg-white/10 text-gray-200'
+                          }`}>
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-white/10 p-3 rounded-lg">
+                            <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+              <CardFooter>
+                <div className="flex gap-2 w-full">
+                  <Input
+                    placeholder="Ask me anything..."
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendChat()}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 flex-1"
+                    disabled={chatLoading}
+                  />
+                  <Button 
+                    onClick={handleSendChat} 
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="bg-purple-500 hover:bg-purple-600"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </TabsContent>
 
           {/* Generate Tab */}
           <TabsContent value="generate" className="space-y-6">
