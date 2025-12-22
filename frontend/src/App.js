@@ -249,7 +249,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [chatLoading, setChatLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
-    try
+    try {
       const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes] = await Promise.all([
         axios.get(`${API}/content-types`),
         axios.get(`${API}/languages`),
