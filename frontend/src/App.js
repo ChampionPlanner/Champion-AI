@@ -1057,6 +1057,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Bulk Generation Dialog */}
       <Dialog open={showBulk} onOpenChange={setShowBulk}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowBulk(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Bulk Generation</DialogTitle>
             <DialogDescription className="text-gray-400">Generate content for multiple topics at once (max 20)</DialogDescription>
