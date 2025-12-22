@@ -1102,6 +1102,154 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* Resume Builder Tab */}
+          <TabsContent value="resume" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-purple-400" /> AI Resume Builder
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">FREE</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Create a professional resume enhanced by AI</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    <div className="space-y-4">
+                      {/* Personal Info */}
+                      <div className="space-y-3">
+                        <h3 className="text-white font-semibold flex items-center gap-2"><User className="h-4 w-4" /> Personal Info</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input placeholder="Full Name *" value={resumeData.name} onChange={(e) => setResumeData({...resumeData, name: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Email *" value={resumeData.email} onChange={(e) => setResumeData({...resumeData, email: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Phone" value={resumeData.phone} onChange={(e) => setResumeData({...resumeData, phone: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Location" value={resumeData.location} onChange={(e) => setResumeData({...resumeData, location: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        <Input placeholder="LinkedIn URL" value={resumeData.linkedin} onChange={(e) => setResumeData({...resumeData, linkedin: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                      </div>
+
+                      {/* Summary */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Professional Summary</h3>
+                        <Textarea placeholder="Brief summary of your experience and goals (AI will enhance this)..." value={resumeData.summary} onChange={(e) => setResumeData({...resumeData, summary: e.target.value})} className="bg-white/5 border-white/10 text-white min-h-[80px]" />
+                      </div>
+
+                      {/* Experience */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-white font-semibold flex items-center gap-2"><Briefcase className="h-4 w-4" /> Experience</h3>
+                          <Button variant="outline" size="sm" onClick={addExperience}><Plus className="h-4 w-4 mr-1" /> Add</Button>
+                        </div>
+                        {resumeData.experience.map((exp, i) => (
+                          <div key={i} className="p-3 bg-white/5 rounded-lg space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400 text-sm">Experience #{i+1}</span>
+                              <Button variant="ghost" size="sm" onClick={() => removeExperience(i)} className="text-red-400 h-6 w-6 p-0"><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input placeholder="Job Title" value={exp.title} onChange={(e) => updateExperience(i, 'title', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Company" value={exp.company} onChange={(e) => updateExperience(i, 'company', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Start Date" value={exp.start_date} onChange={(e) => updateExperience(i, 'start_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="End Date" value={exp.end_date} onChange={(e) => updateExperience(i, 'end_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                            </div>
+                            <Textarea placeholder="Job description (AI will enhance)..." value={exp.description} onChange={(e) => updateExperience(i, 'description', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm min-h-[60px]" />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Education */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-white font-semibold">Education</h3>
+                          <Button variant="outline" size="sm" onClick={addEducation}><Plus className="h-4 w-4 mr-1" /> Add</Button>
+                        </div>
+                        {resumeData.education.map((edu, i) => (
+                          <div key={i} className="p-3 bg-white/5 rounded-lg space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400 text-sm">Education #{i+1}</span>
+                              <Button variant="ghost" size="sm" onClick={() => removeEducation(i)} className="text-red-400 h-6 w-6 p-0"><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input placeholder="School" value={edu.school} onChange={(e) => updateEducation(i, 'school', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Degree" value={edu.degree} onChange={(e) => updateEducation(i, 'degree', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Field of Study" value={edu.field} onChange={(e) => updateEducation(i, 'field', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Graduation Year" value={edu.end_date} onChange={(e) => updateEducation(i, 'end_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Skills */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Skills</h3>
+                        <Input placeholder="Enter skills separated by commas (e.g., JavaScript, Project Management, Excel)" value={resumeData.skills.join(', ')} onChange={(e) => setResumeData({...resumeData, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})} className="bg-white/5 border-white/10 text-white" />
+                        <div className="flex flex-wrap gap-1">
+                          {resumeData.skills.map((skill, i) => (
+                            <Badge key={i} className="bg-purple-500/20 text-purple-300">{skill}</Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Template */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Template Style</h3>
+                        <div className="flex gap-2">
+                          {["modern", "classic", "minimal"].map((t) => (
+                            <Button key={t} variant={resumeData.template === t ? "default" : "outline"} size="sm" onClick={() => setResumeData({...resumeData, template: t})} className={resumeData.template === t ? "bg-purple-500" : ""}>
+                              {t.charAt(0).toUpperCase() + t.slice(1)}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={generateResume} disabled={resumeGenerating} className="w-full bg-gradient-to-r from-purple-500 to-pink-500">
+                    {resumeGenerating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="h-4 w-4 mr-2" /> Generate Resume</>}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* Resume Preview */}
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-purple-400" /> Resume Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {resumeHtml ? (
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-lg overflow-hidden h-[450px]">
+                        <iframe srcDoc={resumeHtml} title="Resume Preview" className="w-full h-full border-0" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={downloadResume} className="flex-1 bg-green-600 hover:bg-green-700">
+                          <Download className="h-4 w-4 mr-2" /> Download HTML
+                        </Button>
+                        <Button variant="outline" onClick={() => {
+                          const win = window.open('', '_blank');
+                          win.document.write(resumeHtml);
+                          win.document.close();
+                          win.print();
+                        }} className="flex-1">
+                          <FileText className="h-4 w-4 mr-2" /> Print / Save PDF
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[450px] text-gray-500">
+                      <Briefcase className="h-16 w-16 mb-4 opacity-50" />
+                      <p>Your resume preview will appear here</p>
+                      <p className="text-sm">Fill in your details and click Generate</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Repurpose Tab */}
           <TabsContent value="repurpose" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
