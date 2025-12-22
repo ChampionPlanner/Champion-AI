@@ -104,17 +104,24 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { icon: Image, title: "AI Images", desc: "Custom graphics & visuals", highlight: true },
-              { icon: RefreshCw, title: "Repurpose", desc: "1 piece → 10+ formats", highlight: true },
-              { icon: Globe, title: "20+ Languages", desc: "Global content creation", highlight: true },
+              { icon: Briefcase, title: "Resume Builder", desc: "AI-enhanced resumes", highlight: true, badge: "FREE" },
+              { icon: MessageCircle, title: "Ask AI", desc: "ChatGPT-like assistant", highlight: true, badge: "FREE" },
+              { icon: Search, title: "SEO Analyzer", desc: "Score your content", highlight: true },
+              { icon: RefreshCw, title: "Repurpose", desc: "1 piece → 10+ formats" },
+              { icon: Globe, title: "20+ Languages", desc: "Global content creation" },
+              { icon: Gift, title: "Daily Credits", desc: "1 free credit daily", badge: "FREE" },
+              { icon: Star, title: "Save Favorites", desc: "Star your best work" },
+              { icon: Twitter, title: "Share to Social", desc: "One-click Twitter share" },
               { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles" },
               { icon: Share2, title: "Social Media", desc: "Viral-worthy posts" },
-              { icon: Mail, title: "Email Copy", desc: "Emails that convert" },
-              { icon: Megaphone, title: "Ad Copy", desc: "High-converting ads" },
-              { icon: Layout, title: "Landing Pages", desc: "Conversion-focused copy" }
+              { icon: Layout, title: "Public Gallery", desc: "Showcase your creations" }
             ].map((feature, i) => (
               <Card key={i} className={`${feature.highlight ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'} hover:bg-white/10 transition-all`}>
                 <CardHeader className="p-4">
-                  <feature.icon className={`h-8 w-8 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
+                  <div className="flex justify-between items-start">
+                    <feature.icon className={`h-8 w-8 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
+                    {feature.badge && <Badge className="bg-green-500/20 text-green-400 text-xs">{feature.badge}</Badge>}
+                  </div>
                   <CardTitle className="text-white text-base">{feature.title}</CardTitle>
                   <CardDescription className="text-gray-400 text-sm">{feature.desc}</CardDescription>
                 </CardHeader>
@@ -125,22 +132,32 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
 
         {/* New Features Section */}
         <div className="mt-24 text-center">
-          <h2 className="text-3xl font-bold text-white mb-12">Powerful Features</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-              <Users className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">Brand Voices</h3>
-              <p className="text-gray-400">Save your brand's tone and style for consistent content</p>
+          <h2 className="text-3xl font-bold text-white mb-4">🚀 Powerful AI Tools</h2>
+          <p className="text-gray-400 mb-12">Everything you need to create, build, and grow</p>
+          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <div className="p-6 bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl border border-green-500/30">
+              <MessageCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Ask AI Anything</h3>
+              <p className="text-gray-400 text-sm">Free ChatGPT-like assistant for any question</p>
+              <Badge className="mt-3 bg-green-500">FREE Forever</Badge>
             </div>
-            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-              <Briefcase className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">Templates</h3>
-              <p className="text-gray-400">Industry-specific templates for faster creation</p>
+            <div className="p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
+              <Briefcase className="h-12 w-12 text-blue-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">AI Resume Builder</h3>
+              <p className="text-gray-400 text-sm">Create professional resumes with AI enhancement</p>
+              <Badge className="mt-3 bg-blue-500">FREE Forever</Badge>
             </div>
-            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-              <Key className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">API Access</h3>
-              <p className="text-gray-400">Integrate our AI into your own applications</p>
+            <div className="p-6 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl border border-purple-500/30">
+              <Search className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">SEO Analyzer</h3>
+              <p className="text-gray-400 text-sm">Get SEO scores and improvement suggestions</p>
+              <Badge className="mt-3 bg-purple-500">Included</Badge>
+            </div>
+            <div className="p-6 bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-xl border border-yellow-500/30">
+              <Gift className="h-12 w-12 text-yellow-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Daily Free Credits</h3>
+              <p className="text-gray-400 text-sm">Claim 1 free credit every day</p>
+              <Badge className="mt-3 bg-yellow-500 text-black">Daily Bonus</Badge>
             </div>
           </div>
         </div>
