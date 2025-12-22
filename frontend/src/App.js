@@ -247,16 +247,25 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [showGallery, setShowGallery] = useState(false);
+  const [showSeoAnalyzer, setShowSeoAnalyzer] = useState(false);
+  const [seoContent, setSeoContent] = useState("");
+  const [seoKeyword, setSeoKeyword] = useState("");
+  const [seoResult, setSeoResult] = useState(null);
+  const [dailyClaimed, setDailyClaimed] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes] = await Promise.all([
+      const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes, favoritesRes] = await Promise.all([
         axios.get(`${API}/content-types`),
         axios.get(`${API}/languages`),
         axios.get(`${API}/templates`),
         axios.get(`${API}/generations/${user.id}`),
         axios.get(`${API}/users/${user.id}/brand-voices`),
-        axios.get(`${API}/referral/${user.id}`)
+        axios.get(`${API}/referral/${user.id}`),
+        axios.get(`${API}/users/${user.id}/favorites`)
       ]);
       setContentTypes(typesRes.data);
       setLanguages(langsRes.data);
