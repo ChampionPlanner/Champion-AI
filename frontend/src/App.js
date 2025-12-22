@@ -1153,9 +1153,25 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                             <p className="text-gray-400 text-sm line-clamp-2">{item.generated_content}</p>
                           )}
                         </CardContent>
-                        <CardFooter>
+                        <CardFooter className="flex gap-1 flex-wrap">
                           <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
                             <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => toggleFavorite(item.id)} className={favorites.some(f => f.id === item.id) ? "text-yellow-400" : "text-gray-400"}>
+                            <Star className="h-4 w-4" fill={favorites.some(f => f.id === item.id) ? "currentColor" : "none"} />
+                          </Button>
+                          {!item.image_url && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                                <Twitter className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => copyAsTweet(item.generated_content)} className="text-gray-400" title="Copy as Tweet">
+                                <span className="text-xs">280</span>
+                              </Button>
+                            </>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => publishToGallery(item.id)} className="text-green-400" title="Publish to Gallery">
+                            <Globe className="h-4 w-4" />
                           </Button>
                         </CardFooter>
                       </Card>
