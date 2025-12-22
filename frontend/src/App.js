@@ -625,11 +625,6 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                   <CardTitle className="text-white flex items-center justify-between">
                     <span>Output</span>
                     <div className="flex gap-2">
-                      {generatedContent && isCodeType && extractCode(generatedContent) && (
-                        <Button variant="ghost" size="sm" onClick={() => setShowPreview(true)} className="text-purple-400">
-                          <Eye className="h-4 w-4 mr-1" /> Preview
-                        </Button>
-                      )}
                       {generatedContent && (
                         <>
                           <Button variant="ghost" size="sm" onClick={() => handleExport('md')} className="text-gray-400">
@@ -644,23 +639,73 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px] rounded-lg">
-                    {generating ? (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                        <Loader2 className="h-8 w-8 animate-spin mb-4" />
-                        <p>Creating content...</p>
+                  {/* Show tabs for code types with preview */}
+                  {generatedContent && isCodeType && extractCode(generatedContent) ? (
+                    <div className="space-y-4">
+                      <div className="flex gap-2 border-b border-white/10 pb-2">
+                        <button
+                          onClick={() => setShowPreview(false)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!showPreview ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                        >
+                          <Code className="h-4 w-4 inline mr-2" />Code
+                        </button>
+                        <button
+                          onClick={() => setShowPreview(true)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${showPreview ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                        >
+                          <Eye className="h-4 w-4 inline mr-2" />Live Preview
+                        </button>
                       </div>
-                    ) : generatedContent ? (
-                      <pre className="whitespace-pre-wrap text-gray-300 text-sm bg-black/30 p-4 rounded-lg">
-                        {generatedContent}
-                      </pre>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                        <Sparkles className="h-12 w-12 mb-4 opacity-50" />
-                        <p>Generated content appears here</p>
-                      </div>
-                    )}
-                  </ScrollArea>
+                      
+                      {showPreview ? (
+                        <div className="h-[350px] rounded-lg overflow-hidden border border-white/10">
+                          <Sandpack
+                            template="react"
+                            theme="dark"
+                            options={{ 
+                              showNavigator: false, 
+                              showTabs: false,
+                              showLineNumbers: false,
+                              showInlineErrors: true,
+                              editorHeight: 0,
+                              externalResources: ["https://cdn.tailwindcss.com"]
+                            }}
+                            files={{
+                              "/App.js": {
+                                code: extractCode(generatedContent),
+                                active: true,
+                                hidden: true
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <ScrollArea className="h-[350px] rounded-lg">
+                          <pre className="whitespace-pre-wrap text-gray-300 text-sm bg-black/30 p-4 rounded-lg">
+                            {generatedContent}
+                          </pre>
+                        </ScrollArea>
+                      )}
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[400px] rounded-lg">
+                      {generating ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                          <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                          <p>Creating content...</p>
+                        </div>
+                      ) : generatedContent ? (
+                        <pre className="whitespace-pre-wrap text-gray-300 text-sm bg-black/30 p-4 rounded-lg">
+                          {generatedContent}
+                        </pre>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                          <Sparkles className="h-12 w-12 mb-4 opacity-50" />
+                          <p>Generated content appears here</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  )}
                 </CardContent>
               </Card>
             </div>
