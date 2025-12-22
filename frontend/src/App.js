@@ -593,9 +593,23 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <span className="text-lg md:text-xl font-bold text-white">Champion AI</span>
           </div>
           <div className="flex items-center gap-1 md:gap-3 flex-wrap justify-end">
+            {!dailyClaimed && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={claimDailyCredit} 
+                className="border-green-500 text-green-400 hover:bg-green-500/20 px-2 animate-pulse"
+                title="Claim your free daily credit!"
+              >
+                <Gift className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Free!</span>
+              </Button>
+            )}
             <Badge variant="outline" className="border-purple-400 text-purple-400 px-2 md:px-3 py-1 text-xs md:text-sm" data-testid="credits-badge">
               <Zap className="h-3 w-3 mr-1" /> {user.credits}
             </Badge>
+            <Button variant="ghost" size="sm" onClick={loadGallery} className="text-gray-300 px-2" title="Gallery">
+              <Globe className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setShowPricing(true)} className="text-gray-300 px-2" data-testid="buy-credits-btn">
               <CreditCard className="h-4 w-4" />
             </Button>
