@@ -18,7 +18,7 @@ import {
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
   ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft,
-  MessageCircle, Send
+  MessageCircle, Send, Heart, ExternalLink, Twitter, Search, Crown, Calendar
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
@@ -247,16 +247,31 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [showGallery, setShowGallery] = useState(false);
+  const [showSeoAnalyzer, setShowSeoAnalyzer] = useState(false);
+  const [seoContent, setSeoContent] = useState("");
+  const [seoKeyword, setSeoKeyword] = useState("");
+  const [seoResult, setSeoResult] = useState(null);
+  const [dailyClaimed, setDailyClaimed] = useState(false);
+  const [resumeData, setResumeData] = useState({
+    name: "", email: "", phone: "", location: "", linkedin: "",
+    summary: "", experience: [], education: [], skills: [], template: "modern"
+  });
+  const [resumeHtml, setResumeHtml] = useState("");
+  const [resumeGenerating, setResumeGenerating] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes] = await Promise.all([
+      const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes, favoritesRes] = await Promise.all([
         axios.get(`${API}/content-types`),
         axios.get(`${API}/languages`),
         axios.get(`${API}/templates`),
         axios.get(`${API}/generations/${user.id}`),
         axios.get(`${API}/users/${user.id}/brand-voices`),
-        axios.get(`${API}/referral/${user.id}`)
+        axios.get(`${API}/referral/${user.id}`),
+        axios.get(`${API}/users/${user.id}/favorites`)
       ]);
       setContentTypes(typesRes.data);
       setLanguages(langsRes.data);
@@ -264,6 +279,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       setHistory(historyRes.data);
       setBrandVoices(voicesRes.data);
       setReferralInfo(referralRes.data);
+      setFavorites(favoritesRes.data);
+      
+      // Check if daily credit was already claimed today
+      const today = new Date().toISOString().split('T')[0];
+      const userRes = await axios.get(`${API}/users/${user.id}`);
+      setDailyClaimed(userRes.data.last_daily_credit === today);
     } catch (e) {
       console.error(e);
     }
@@ -472,6 +493,164 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     toast.success("Copied!");
   };
 
+  // Share to social media
+  const shareToTwitter = (text) => {
+    const tweetText = text.length > 250 ? text.substring(0, 247) + "..." : text;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&via=ChampionAI`;
+    window.open(url, '_blank');
+  };
+
+  const shareToLinkedIn = (text) => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
+    window.open(url, '_blank');
+  };
+
+  const copyAsTweet = (text) => {
+    const tweet = text.length > 280 ? text.substring(0, 277) + "..." : text;
+    navigator.clipboard.writeText(tweet);
+    toast.success(`Copied! (${tweet.length}/280 characters)`);
+  };
+
+  // Claim daily free credit
+  const claimDailyCredit = async () => {
+    try {
+      await axios.post(`${API}/users/${user.id}/claim-daily-credit`);
+      toast.success("🎁 You got 1 free credit!");
+      setDailyClaimed(true);
+      refreshUser();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Already claimed today!");
+    }
+  };
+
+  // Toggle favorite
+  const toggleFavorite = async (generationId) => {
+    const isFav = favorites.some(f => f.id === generationId);
+    try {
+      if (isFav) {
+        await axios.delete(`${API}/users/${user.id}/favorites/${generationId}`);
+        setFavorites(favorites.filter(f => f.id !== generationId));
+        toast.success("Removed from favorites");
+      } else {
+        await axios.post(`${API}/users/${user.id}/favorites/${generationId}`);
+        const gen = history.find(h => h.id === generationId);
+        if (gen) setFavorites([...favorites, gen]);
+        toast.success("Added to favorites! ⭐");
+      }
+    } catch (e) {
+      toast.error("Failed to update favorites");
+    }
+  };
+
+  // Publish to gallery
+  const publishToGallery = async (generationId) => {
+    try {
+      await axios.post(`${API}/generations/${generationId}/publish?user_id=${user.id}`);
+      toast.success("Published to gallery! 🌟");
+      fetchData();
+    } catch (e) {
+      toast.error("Failed to publish");
+    }
+  };
+
+  // Load gallery
+  const loadGallery = async () => {
+    try {
+      const res = await axios.get(`${API}/gallery`);
+      setGallery(res.data);
+      setShowGallery(true);
+    } catch (e) {
+      toast.error("Failed to load gallery");
+    }
+  };
+
+  // SEO Analyzer
+  const analyzeSeo = async () => {
+    if (!seoContent.trim() || !seoKeyword.trim()) {
+      toast.error("Enter content and keyword");
+      return;
+    }
+    try {
+      const res = await axios.post(`${API}/analyze-seo?content=${encodeURIComponent(seoContent)}&keyword=${encodeURIComponent(seoKeyword)}&user_id=${user.id}`);
+      setSeoResult(res.data);
+    } catch (e) {
+      toast.error("Failed to analyze");
+    }
+  };
+
+  // Resume Builder
+  const generateResume = async () => {
+    if (!resumeData.name || !resumeData.email) {
+      toast.error("Name and email are required");
+      return;
+    }
+    setResumeGenerating(true);
+    try {
+      const res = await axios.post(`${API}/generate-resume`, {
+        user_id: user.id,
+        ...resumeData,
+        enhance_with_ai: true
+      });
+      setResumeHtml(res.data.html);
+      toast.success("Resume generated! 🎉");
+    } catch (e) {
+      toast.error("Failed to generate resume");
+    } finally {
+      setResumeGenerating(false);
+    }
+  };
+
+  const downloadResume = () => {
+    const blob = new Blob([resumeHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${resumeData.name.replace(/\s+/g, '_')}_Resume.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Resume downloaded!");
+  };
+
+  const addExperience = () => {
+    setResumeData({
+      ...resumeData,
+      experience: [...resumeData.experience, { company: "", title: "", start_date: "", end_date: "", description: "" }]
+    });
+  };
+
+  const addEducation = () => {
+    setResumeData({
+      ...resumeData,
+      education: [...resumeData.education, { school: "", degree: "", field: "", start_date: "", end_date: "" }]
+    });
+  };
+
+  const updateExperience = (index, field, value) => {
+    const newExp = [...resumeData.experience];
+    newExp[index][field] = value;
+    setResumeData({ ...resumeData, experience: newExp });
+  };
+
+  const updateEducation = (index, field, value) => {
+    const newEdu = [...resumeData.education];
+    newEdu[index][field] = value;
+    setResumeData({ ...resumeData, education: newEdu });
+  };
+
+  const removeExperience = (index) => {
+    setResumeData({
+      ...resumeData,
+      experience: resumeData.experience.filter((_, i) => i !== index)
+    });
+  };
+
+  const removeEducation = (index) => {
+    setResumeData({
+      ...resumeData,
+      education: resumeData.education.filter((_, i) => i !== index)
+    });
+  };
+
   const extractCode = (content) => {
     const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
     const matches = [...content.matchAll(codeBlockRegex)];
@@ -493,9 +672,23 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <span className="text-lg md:text-xl font-bold text-white">Champion AI</span>
           </div>
           <div className="flex items-center gap-1 md:gap-3 flex-wrap justify-end">
+            {!dailyClaimed && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={claimDailyCredit} 
+                className="border-green-500 text-green-400 hover:bg-green-500/20 px-2 animate-pulse"
+                title="Claim your free daily credit!"
+              >
+                <Gift className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Free!</span>
+              </Button>
+            )}
             <Badge variant="outline" className="border-purple-400 text-purple-400 px-2 md:px-3 py-1 text-xs md:text-sm" data-testid="credits-badge">
               <Zap className="h-3 w-3 mr-1" /> {user.credits}
             </Badge>
+            <Button variant="ghost" size="sm" onClick={loadGallery} className="text-gray-300 px-2" title="Gallery">
+              <Globe className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setShowPricing(true)} className="text-gray-300 px-2" data-testid="buy-credits-btn">
               <CreditCard className="h-4 w-4" />
             </Button>
@@ -518,21 +711,30 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-5 h-auto">
-            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <MessageCircle className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Ask AI</span>
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 md:grid-cols-8 h-auto gap-1">
+            <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <MessageCircle className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Ask AI</span>
             </TabsTrigger>
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <Sparkles className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Generate</span>
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Sparkles className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Generate</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <Image className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">AI Image</span>
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Image className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Image</span>
             </TabsTrigger>
-            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <RefreshCw className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Repurpose</span>
+            <TabsTrigger value="resume" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Briefcase className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Resume</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
-              <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <RefreshCw className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Repurpose</span>
+            </TabsTrigger>
+            <TabsTrigger value="seo" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Search className="h-4 w-4" /> <span className="hidden lg:inline ml-1">SEO</span>
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <Star className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Saved</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <History className="h-4 w-4" /> <span className="hidden lg:inline ml-1">History</span>
             </TabsTrigger>
           </TabsList>
 
@@ -900,6 +1102,154 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* Resume Builder Tab */}
+          <TabsContent value="resume" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-purple-400" /> AI Resume Builder
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">FREE</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Create a professional resume enhanced by AI</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    <div className="space-y-4">
+                      {/* Personal Info */}
+                      <div className="space-y-3">
+                        <h3 className="text-white font-semibold flex items-center gap-2"><User className="h-4 w-4" /> Personal Info</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input placeholder="Full Name *" value={resumeData.name} onChange={(e) => setResumeData({...resumeData, name: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Email *" value={resumeData.email} onChange={(e) => setResumeData({...resumeData, email: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Phone" value={resumeData.phone} onChange={(e) => setResumeData({...resumeData, phone: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                          <Input placeholder="Location" value={resumeData.location} onChange={(e) => setResumeData({...resumeData, location: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        <Input placeholder="LinkedIn URL" value={resumeData.linkedin} onChange={(e) => setResumeData({...resumeData, linkedin: e.target.value})} className="bg-white/5 border-white/10 text-white" />
+                      </div>
+
+                      {/* Summary */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Professional Summary</h3>
+                        <Textarea placeholder="Brief summary of your experience and goals (AI will enhance this)..." value={resumeData.summary} onChange={(e) => setResumeData({...resumeData, summary: e.target.value})} className="bg-white/5 border-white/10 text-white min-h-[80px]" />
+                      </div>
+
+                      {/* Experience */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-white font-semibold flex items-center gap-2"><Briefcase className="h-4 w-4" /> Experience</h3>
+                          <Button variant="outline" size="sm" onClick={addExperience}><Plus className="h-4 w-4 mr-1" /> Add</Button>
+                        </div>
+                        {resumeData.experience.map((exp, i) => (
+                          <div key={i} className="p-3 bg-white/5 rounded-lg space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400 text-sm">Experience #{i+1}</span>
+                              <Button variant="ghost" size="sm" onClick={() => removeExperience(i)} className="text-red-400 h-6 w-6 p-0"><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input placeholder="Job Title" value={exp.title} onChange={(e) => updateExperience(i, 'title', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Company" value={exp.company} onChange={(e) => updateExperience(i, 'company', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Start Date" value={exp.start_date} onChange={(e) => updateExperience(i, 'start_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="End Date" value={exp.end_date} onChange={(e) => updateExperience(i, 'end_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                            </div>
+                            <Textarea placeholder="Job description (AI will enhance)..." value={exp.description} onChange={(e) => updateExperience(i, 'description', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm min-h-[60px]" />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Education */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-white font-semibold">Education</h3>
+                          <Button variant="outline" size="sm" onClick={addEducation}><Plus className="h-4 w-4 mr-1" /> Add</Button>
+                        </div>
+                        {resumeData.education.map((edu, i) => (
+                          <div key={i} className="p-3 bg-white/5 rounded-lg space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400 text-sm">Education #{i+1}</span>
+                              <Button variant="ghost" size="sm" onClick={() => removeEducation(i)} className="text-red-400 h-6 w-6 p-0"><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input placeholder="School" value={edu.school} onChange={(e) => updateEducation(i, 'school', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Degree" value={edu.degree} onChange={(e) => updateEducation(i, 'degree', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Field of Study" value={edu.field} onChange={(e) => updateEducation(i, 'field', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                              <Input placeholder="Graduation Year" value={edu.end_date} onChange={(e) => updateEducation(i, 'end_date', e.target.value)} className="bg-white/5 border-white/10 text-white text-sm" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Skills */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Skills</h3>
+                        <Input placeholder="Enter skills separated by commas (e.g., JavaScript, Project Management, Excel)" value={resumeData.skills.join(', ')} onChange={(e) => setResumeData({...resumeData, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})} className="bg-white/5 border-white/10 text-white" />
+                        <div className="flex flex-wrap gap-1">
+                          {resumeData.skills.map((skill, i) => (
+                            <Badge key={i} className="bg-purple-500/20 text-purple-300">{skill}</Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Template */}
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold">Template Style</h3>
+                        <div className="flex gap-2">
+                          {["modern", "classic", "minimal"].map((t) => (
+                            <Button key={t} variant={resumeData.template === t ? "default" : "outline"} size="sm" onClick={() => setResumeData({...resumeData, template: t})} className={resumeData.template === t ? "bg-purple-500" : ""}>
+                              {t.charAt(0).toUpperCase() + t.slice(1)}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={generateResume} disabled={resumeGenerating} className="w-full bg-gradient-to-r from-purple-500 to-pink-500">
+                    {resumeGenerating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="h-4 w-4 mr-2" /> Generate Resume</>}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* Resume Preview */}
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-purple-400" /> Resume Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {resumeHtml ? (
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-lg overflow-hidden h-[450px]">
+                        <iframe srcDoc={resumeHtml} title="Resume Preview" className="w-full h-full border-0" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={downloadResume} className="flex-1 bg-green-600 hover:bg-green-700">
+                          <Download className="h-4 w-4 mr-2" /> Download HTML
+                        </Button>
+                        <Button variant="outline" onClick={() => {
+                          const win = window.open('', '_blank');
+                          win.document.write(resumeHtml);
+                          win.document.close();
+                          win.print();
+                        }} className="flex-1">
+                          <FileText className="h-4 w-4 mr-2" /> Print / Save PDF
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[450px] text-gray-500">
+                      <Briefcase className="h-16 w-16 mb-4 opacity-50" />
+                      <p>Your resume preview will appear here</p>
+                      <p className="text-sm">Fill in your details and click Generate</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Repurpose Tab */}
           <TabsContent value="repurpose" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
@@ -1004,6 +1354,140 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* SEO Analyzer Tab */}
+          <TabsContent value="seo" className="space-y-6">
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Search className="h-5 w-5 text-purple-400" /> SEO Content Analyzer
+                </CardTitle>
+                <CardDescription className="text-gray-400">Check your content's SEO score and get improvement tips</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Target Keyword</Label>
+                  <Input 
+                    placeholder="e.g., digital marketing tips"
+                    value={seoKeyword}
+                    onChange={(e) => setSeoKeyword(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Content to Analyze</Label>
+                  <textarea 
+                    placeholder="Paste your blog post, article, or any content here..."
+                    value={seoContent}
+                    onChange={(e) => setSeoContent(e.target.value)}
+                    className="w-full h-48 p-3 bg-white/5 border border-white/10 rounded-lg text-white resize-none"
+                  />
+                </div>
+                <Button onClick={analyzeSeo} className="w-full bg-gradient-to-r from-purple-500 to-pink-500">
+                  <Search className="h-4 w-4 mr-2" /> Analyze SEO Score
+                </Button>
+                
+                {seoResult && (
+                  <div className="mt-6 p-6 bg-white/5 rounded-lg space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-gray-400 text-sm">SEO Score</p>
+                        <span className="text-4xl font-bold text-white">{seoResult.score}<span className="text-xl text-gray-400">/100</span></span>
+                      </div>
+                      <Badge className={`text-lg px-4 py-2 ${seoResult.score >= 75 ? "bg-green-500" : seoResult.score >= 50 ? "bg-yellow-500" : "bg-red-500"}`}>
+                        {seoResult.verdict}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.word_count}</p>
+                        <p className="text-xs text-gray-400">Total Words</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.keyword_count}</p>
+                        <p className="text-xs text-gray-400">Keyword Uses</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg">
+                        <p className="text-3xl font-bold text-white">{seoResult.keyword_density}%</p>
+                        <p className="text-xs text-gray-400">Keyword Density</p>
+                      </div>
+                    </div>
+                    {seoResult.suggestions.length > 0 && (
+                      <div className="pt-4 border-t border-white/10">
+                        <p className="text-white font-medium mb-3">💡 Improvement Suggestions:</p>
+                        <ul className="space-y-2">
+                          {seoResult.suggestions.map((s, i) => (
+                            <li key={i} className="text-gray-300 text-sm flex items-start gap-2 bg-white/5 p-3 rounded">
+                              <span className="text-yellow-400">→</span> {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Favorites Tab */}
+          <TabsContent value="favorites">
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-400" /> Saved Favorites
+                </CardTitle>
+                <CardDescription className="text-gray-400">Your starred content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {favorites.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No favorites yet</p>
+                    <p className="text-sm">Star your best generations to save them here</p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {favorites.map((item) => (
+                      <Card key={item.id} className="bg-black/20 border-white/10">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-white text-lg">{item.topic}</CardTitle>
+                              <CardDescription className="text-gray-500 text-xs">
+                                {new Date(item.created_at).toLocaleString()}
+                              </CardDescription>
+                            </div>
+                            <Badge className="bg-purple-500/20 text-purple-300">{item.content_type}</Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.topic} className="w-full h-32 object-cover rounded" />
+                          ) : (
+                            <p className="text-gray-400 text-sm line-clamp-3">{item.generated_content}</p>
+                          )}
+                        </CardContent>
+                        <CardFooter className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
+                            <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => toggleFavorite(item.id)} className="text-yellow-400">
+                            <Star className="h-4 w-4" fill="currentColor" /> Remove
+                          </Button>
+                          {!item.image_url && (
+                            <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                              <Twitter className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* History Tab */}
           <TabsContent value="history">
             <Card className="bg-white/5 border-white/10">
@@ -1039,9 +1523,25 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                             <p className="text-gray-400 text-sm line-clamp-2">{item.generated_content}</p>
                           )}
                         </CardContent>
-                        <CardFooter>
+                        <CardFooter className="flex gap-1 flex-wrap">
                           <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
                             <Copy className="h-4 w-4 mr-1" /> Copy
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => toggleFavorite(item.id)} className={favorites.some(f => f.id === item.id) ? "text-yellow-400" : "text-gray-400"}>
+                            <Star className="h-4 w-4" fill={favorites.some(f => f.id === item.id) ? "currentColor" : "none"} />
+                          </Button>
+                          {!item.image_url && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                                <Twitter className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => copyAsTweet(item.generated_content)} className="text-gray-400" title="Copy as Tweet">
+                                <span className="text-xs">280</span>
+                              </Button>
+                            </>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => publishToGallery(item.id)} className="text-green-400" title="Publish to Gallery">
+                            <Globe className="h-4 w-4" />
                           </Button>
                         </CardFooter>
                       </Card>
@@ -1518,6 +2018,144 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Gallery Dialog */}
+      <Dialog open={showGallery} onOpenChange={setShowGallery}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-4xl max-h-[80vh] overflow-hidden">
+          <button 
+            onClick={() => setShowGallery(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Globe className="text-purple-400" /> Public Gallery
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Explore content created by the community</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[500px] mt-4">
+            {gallery.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No public content yet</p>
+                <p className="text-sm">Be the first to share!</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {gallery.map((item) => (
+                  <Card key={item.id} className="bg-white/5 border-white/10">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-white text-lg">{item.topic}</CardTitle>
+                          <CardDescription className="text-gray-500">by {item.author_name}</CardDescription>
+                        </div>
+                        <Badge className="bg-purple-500/20 text-purple-300">{item.content_type}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.topic} className="w-full h-40 object-cover rounded" />
+                      ) : (
+                        <p className="text-gray-400 text-sm line-clamp-4">{item.generated_content}</p>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(item.image_url || item.generated_content)} className="text-purple-400">
+                        <Copy className="h-4 w-4 mr-1" /> Copy
+                      </Button>
+                      {!item.image_url && (
+                        <Button variant="ghost" size="sm" onClick={() => shareToTwitter(item.generated_content)} className="text-blue-400">
+                          <Twitter className="h-4 w-4 mr-1" /> Tweet
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* SEO Analyzer Dialog */}
+      <Dialog open={showSeoAnalyzer} onOpenChange={setShowSeoAnalyzer}>
+        <DialogContent className="bg-slate-900 border-white/10 max-w-2xl">
+          <button 
+            onClick={() => setShowSeoAnalyzer(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <Search className="text-purple-400" /> SEO Analyzer
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Check your content's SEO score</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label className="text-gray-300">Target Keyword</Label>
+              <Input 
+                placeholder="e.g., digital marketing"
+                value={seoKeyword}
+                onChange={(e) => setSeoKeyword(e.target.value)}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-300">Content to Analyze</Label>
+              <textarea 
+                placeholder="Paste your content here..."
+                value={seoContent}
+                onChange={(e) => setSeoContent(e.target.value)}
+                className="w-full h-32 p-3 bg-white/5 border border-white/10 rounded-lg text-white resize-none"
+              />
+            </div>
+            <Button onClick={analyzeSeo} className="w-full bg-purple-500 hover:bg-purple-600">
+              <Search className="h-4 w-4 mr-2" /> Analyze SEO
+            </Button>
+            
+            {seoResult && (
+              <div className="p-4 bg-white/5 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-bold text-2xl">Score: {seoResult.score}/100</span>
+                  <Badge className={seoResult.score >= 75 ? "bg-green-500" : seoResult.score >= 50 ? "bg-yellow-500" : "bg-red-500"}>
+                    {seoResult.verdict}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.word_count}</p>
+                    <p className="text-xs text-gray-400">Words</p>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.keyword_count}</p>
+                    <p className="text-xs text-gray-400">Keywords</p>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded">
+                    <p className="text-2xl text-white">{seoResult.keyword_density}%</p>
+                    <p className="text-xs text-gray-400">Density</p>
+                  </div>
+                </div>
+                {seoResult.suggestions.length > 0 && (
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Suggestions:</p>
+                    <ul className="space-y-1">
+                      {seoResult.suggestions.map((s, i) => (
+                        <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                          <span className="text-yellow-400">•</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

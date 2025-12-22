@@ -192,9 +192,9 @@ CONTENT_TYPES = {
 
 PRICING_PLANS = {
     "free": {"name": "Free Trial", "credits": 3, "price": 0},
-    "starter": {"name": "Starter", "credits": 50, "price": 9},
-    "pro": {"name": "Pro", "credits": 200, "price": 29},
-    "unlimited": {"name": "Unlimited", "credits": 999999, "price": 49}
+    "starter": {"name": "Starter", "credits": 50, "price": 9.99, "features": ["50 credits/month", "Email support", "All content types"]},
+    "pro": {"name": "Pro", "credits": 200, "price": 29.99, "features": ["200 credits/month", "Priority support", "API access", "Advanced templates"]},
+    "business": {"name": "Business", "credits": 500, "price": 79.99, "features": ["500 credits/month", "Dedicated support", "API access", "Custom templates", "Team features"]}
 }
 
 # =============================================================================
@@ -214,6 +214,10 @@ class User(BaseModel):
     referral_credits_earned: int = 0
     brand_voices: List[Dict] = []
     api_key: Optional[str] = None
+    favorites: List[str] = []  # List of generation IDs
+    last_daily_credit: Optional[str] = None  # Date string of last daily credit claim
+    subscription_id: Optional[str] = None  # Stripe subscription ID
+    subscription_status: Optional[str] = None  # active, canceled, past_due
 
 class UserCreate(BaseModel):
     email: str
@@ -518,6 +522,370 @@ async def get_api_key(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"api_key": user.get('api_key')}
+
+# =============================================================================
+# DAILY FREE CREDIT
+# =============================================================================
+@api_router.post("/users/{user_id}/claim-daily-credit")
+async def claim_daily_credit(user_id: str):
+    """Claim 1 free credit per day"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    last_claim = user.get('last_daily_credit')
+    
+    if last_claim == today:
+        raise HTTPException(status_code=400, detail="Daily credit already claimed today. Come back tomorrow!")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {"credits": 1}, "$set": {"last_daily_credit": today}}
+    )
+    
+    return {"success": True, "message": "You got 1 free credit!", "new_credits": user['credits'] + 1}
+
+# =============================================================================
+# FAVORITES
+# =============================================================================
+@api_router.post("/users/{user_id}/favorites/{generation_id}")
+async def add_favorite(user_id: str, generation_id: str):
+    """Add a generation to favorites"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    favorites = user.get('favorites', [])
+    if generation_id in favorites:
+        raise HTTPException(status_code=400, detail="Already in favorites")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$push": {"favorites": generation_id}}
+    )
+    return {"success": True, "message": "Added to favorites"}
+
+@api_router.delete("/users/{user_id}/favorites/{generation_id}")
+async def remove_favorite(user_id: str, generation_id: str):
+    """Remove a generation from favorites"""
+    await db.users.update_one(
+        {"id": user_id},
+        {"$pull": {"favorites": generation_id}}
+    )
+    return {"success": True, "message": "Removed from favorites"}
+
+@api_router.get("/users/{user_id}/favorites")
+async def get_favorites(user_id: str):
+    """Get user's favorite generations"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    favorite_ids = user.get('favorites', [])
+    if not favorite_ids:
+        return []
+    
+    favorites = await db.generations.find(
+        {"id": {"$in": favorite_ids}}, 
+        {"_id": 0}
+    ).to_list(100)
+    
+    return favorites
+
+# =============================================================================
+# PUBLIC GALLERY
+# =============================================================================
+@api_router.post("/generations/{generation_id}/publish")
+async def publish_to_gallery(generation_id: str, user_id: str = Query(...)):
+    """Publish a generation to the public gallery"""
+    generation = await db.generations.find_one({"id": generation_id, "user_id": user_id}, {"_id": 0})
+    if not generation:
+        raise HTTPException(status_code=404, detail="Generation not found")
+    
+    await db.generations.update_one(
+        {"id": generation_id},
+        {"$set": {"is_public": True, "published_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"success": True, "message": "Published to gallery!"}
+
+@api_router.delete("/generations/{generation_id}/unpublish")
+async def unpublish_from_gallery(generation_id: str, user_id: str = Query(...)):
+    """Remove a generation from the public gallery"""
+    await db.generations.update_one(
+        {"id": generation_id, "user_id": user_id},
+        {"$set": {"is_public": False}}
+    )
+    return {"success": True, "message": "Removed from gallery"}
+
+@api_router.get("/gallery")
+async def get_public_gallery(limit: int = Query(20, le=50), skip: int = Query(0)):
+    """Get public gallery items"""
+    gallery = await db.generations.find(
+        {"is_public": True},
+        {"_id": 0, "generated_content": {"$slice": 500}}  # Truncate content
+    ).sort("published_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Get user names for each item
+    for item in gallery:
+        user = await db.users.find_one({"id": item.get("user_id")}, {"_id": 0, "name": 1})
+        item["author_name"] = user.get("name", "Anonymous") if user else "Anonymous"
+    
+    return gallery
+
+# =============================================================================
+# RESUME BUILDER
+# =============================================================================
+class ResumeRequest(BaseModel):
+    user_id: str
+    name: str
+    email: str
+    phone: str = ""
+    location: str = ""
+    linkedin: str = ""
+    summary: str = ""
+    experience: List[Dict] = []  # [{company, title, start_date, end_date, description}]
+    education: List[Dict] = []  # [{school, degree, field, start_date, end_date}]
+    skills: List[str] = []
+    template: str = "modern"  # modern, classic, minimal
+    enhance_with_ai: bool = True
+
+@api_router.post("/generate-resume")
+async def generate_resume(request: ResumeRequest):
+    """Generate a professional resume with AI enhancement"""
+    user = await db.users.find_one({"id": request.user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Build the resume content
+    enhanced_summary = request.summary
+    enhanced_experiences = request.experience
+    
+    # Use AI to enhance content if requested
+    if request.enhance_with_ai and (request.summary or request.experience):
+        try:
+            llm_client = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=str(uuid.uuid4()),
+                system_message="You are a professional resume writer. Enhance the content to be more impactful and professional while keeping it concise. Use action verbs and quantify achievements where possible."
+            )
+            llm_client = llm_client.with_model("openai", "gpt-4o-mini")
+            
+            # Enhance summary
+            if request.summary:
+                summary_prompt = f"Enhance this professional summary to be more impactful (keep it under 100 words):\n\n{request.summary}"
+                user_msg = UserMessage(text=summary_prompt)
+                enhanced_summary = await llm_client.send_message(user_msg)
+            
+            # Enhance experience descriptions
+            for i, exp in enumerate(request.experience):
+                if exp.get('description'):
+                    exp_prompt = f"Enhance this job description with action verbs and impact (keep it under 80 words):\nJob: {exp.get('title')} at {exp.get('company')}\nDescription: {exp.get('description')}"
+                    user_msg = UserMessage(text=exp_prompt)
+                    enhanced_experiences[i]['description'] = await llm_client.send_message(user_msg)
+        except Exception as e:
+            logging.error(f"AI enhancement error: {e}")
+    
+    # Generate HTML resume based on template
+    template_styles = {
+        "modern": {
+            "header_bg": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "accent": "#667eea",
+            "font": "'Poppins', sans-serif"
+        },
+        "classic": {
+            "header_bg": "#2c3e50",
+            "accent": "#2c3e50",
+            "font": "'Georgia', serif"
+        },
+        "minimal": {
+            "header_bg": "#1a1a1a",
+            "accent": "#1a1a1a",
+            "font": "'Inter', sans-serif"
+        }
+    }
+    
+    style = template_styles.get(request.template, template_styles["modern"])
+    
+    # Build experience HTML
+    exp_html = ""
+    for exp in enhanced_experiences:
+        exp_html += f"""
+        <div class="experience-item">
+            <div class="exp-header">
+                <div>
+                    <h3>{exp.get('title', '')}</h3>
+                    <p class="company">{exp.get('company', '')}</p>
+                </div>
+                <span class="dates">{exp.get('start_date', '')} - {exp.get('end_date', 'Present')}</span>
+            </div>
+            <p class="description">{exp.get('description', '')}</p>
+        </div>
+        """
+    
+    # Build education HTML
+    edu_html = ""
+    for edu in request.education:
+        edu_html += f"""
+        <div class="education-item">
+            <div class="edu-header">
+                <div>
+                    <h3>{edu.get('degree', '')} in {edu.get('field', '')}</h3>
+                    <p class="school">{edu.get('school', '')}</p>
+                </div>
+                <span class="dates">{edu.get('start_date', '')} - {edu.get('end_date', '')}</span>
+            </div>
+        </div>
+        """
+    
+    # Build skills HTML
+    skills_html = "".join([f'<span class="skill-tag">{skill}</span>' for skill in request.skills])
+    
+    html_resume = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>{request.name} - Resume</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: {style['font']}; line-height: 1.6; color: #333; background: #f5f5f5; }}
+        .resume {{ max-width: 800px; margin: 20px auto; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }}
+        .header {{ background: {style['header_bg']}; color: white; padding: 40px; text-align: center; }}
+        .header h1 {{ font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }}
+        .header .contact {{ display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 0.9em; opacity: 0.9; }}
+        .header .contact span {{ display: flex; align-items: center; gap: 5px; }}
+        .content {{ padding: 40px; }}
+        .section {{ margin-bottom: 30px; }}
+        .section-title {{ color: {style['accent']}; font-size: 1.3em; font-weight: 600; border-bottom: 2px solid {style['accent']}; padding-bottom: 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }}
+        .summary {{ font-size: 1.05em; color: #555; line-height: 1.8; }}
+        .experience-item, .education-item {{ margin-bottom: 25px; }}
+        .exp-header, .edu-header {{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }}
+        .exp-header h3, .edu-header h3 {{ color: #333; font-size: 1.1em; }}
+        .company, .school {{ color: {style['accent']}; font-weight: 500; }}
+        .dates {{ color: #888; font-size: 0.9em; white-space: nowrap; }}
+        .description {{ color: #555; font-size: 0.95em; }}
+        .skills {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+        .skill-tag {{ background: {style['accent']}15; color: {style['accent']}; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500; }}
+        @media print {{
+            body {{ background: white; }}
+            .resume {{ box-shadow: none; margin: 0; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <div class="header">
+            <h1>{request.name}</h1>
+            <div class="contact">
+                <span>📧 {request.email}</span>
+                {f'<span>📱 {request.phone}</span>' if request.phone else ''}
+                {f'<span>📍 {request.location}</span>' if request.location else ''}
+                {f'<span>💼 {request.linkedin}</span>' if request.linkedin else ''}
+            </div>
+        </div>
+        <div class="content">
+            {f'<div class="section"><h2 class="section-title">Professional Summary</h2><p class="summary">{enhanced_summary}</p></div>' if enhanced_summary else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Experience</h2>{exp_html}</div>' if exp_html else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Education</h2>{edu_html}</div>' if edu_html else ''}
+            
+            {f'<div class="section"><h2 class="section-title">Skills</h2><div class="skills">{skills_html}</div></div>' if skills_html else ''}
+        </div>
+    </div>
+</body>
+</html>
+"""
+    
+    # Save to generations
+    generation = {
+        "id": str(uuid.uuid4()),
+        "user_id": request.user_id,
+        "content_type": "resume",
+        "topic": f"Resume - {request.name}",
+        "generated_content": html_resume,
+        "credits_used": 0,  # Free feature
+        "language": "en",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.generations.insert_one(generation)
+    await db.users.update_one(
+        {"id": request.user_id},
+        {"$push": {"generations": generation["id"]}}
+    )
+    
+    return {
+        "success": True,
+        "html": html_resume,
+        "generation_id": generation["id"]
+    }
+
+# =============================================================================
+# SEO ANALYZER
+# =============================================================================
+@api_router.post("/analyze-seo")
+async def analyze_seo(content: str = Query(...), keyword: str = Query(...), user_id: str = Query(...)):
+    """Analyze content for SEO and get improvement suggestions"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Basic SEO analysis
+    word_count = len(content.split())
+    keyword_count = content.lower().count(keyword.lower())
+    keyword_density = (keyword_count / word_count * 100) if word_count > 0 else 0
+    
+    # Calculate score
+    score = 0
+    suggestions = []
+    
+    # Word count check
+    if word_count >= 300:
+        score += 25
+    else:
+        suggestions.append(f"Add more content. Current: {word_count} words. Aim for 300+ words.")
+    
+    # Keyword density check (ideal: 1-3%)
+    if 1 <= keyword_density <= 3:
+        score += 25
+    elif keyword_density < 1:
+        suggestions.append(f"Use your keyword '{keyword}' more often. Current density: {keyword_density:.1f}%")
+    else:
+        suggestions.append(f"Reduce keyword usage to avoid stuffing. Current density: {keyword_density:.1f}%")
+    
+    # Keyword in first 100 words
+    first_100 = ' '.join(content.split()[:100]).lower()
+    if keyword.lower() in first_100:
+        score += 25
+    else:
+        suggestions.append(f"Include '{keyword}' in the first 100 words for better SEO.")
+    
+    # Has headings (markdown)
+    if '#' in content or content.count('\n\n') >= 3:
+        score += 25
+    else:
+        suggestions.append("Add headings and break content into sections for better readability.")
+    
+    return {
+        "score": score,
+        "word_count": word_count,
+        "keyword_count": keyword_count,
+        "keyword_density": round(keyword_density, 2),
+        "suggestions": suggestions,
+        "verdict": "Excellent!" if score >= 75 else "Good" if score >= 50 else "Needs Improvement"
+    }
+
+# =============================================================================
+# SUBSCRIPTION PLANS
+# =============================================================================
+@api_router.get("/pricing-plans")
+async def get_pricing_plans():
+    """Get all available pricing plans"""
+    return PRICING_PLANS
 
 # =============================================================================
 # CONTENT GENERATION
