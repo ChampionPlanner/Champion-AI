@@ -487,6 +487,91 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     toast.success("Copied!");
   };
 
+  // Share to social media
+  const shareToTwitter = (text) => {
+    const tweetText = text.length > 250 ? text.substring(0, 247) + "..." : text;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&via=ChampionAI`;
+    window.open(url, '_blank');
+  };
+
+  const shareToLinkedIn = (text) => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
+    window.open(url, '_blank');
+  };
+
+  const copyAsTweet = (text) => {
+    const tweet = text.length > 280 ? text.substring(0, 277) + "..." : text;
+    navigator.clipboard.writeText(tweet);
+    toast.success(`Copied! (${tweet.length}/280 characters)`);
+  };
+
+  // Claim daily free credit
+  const claimDailyCredit = async () => {
+    try {
+      await axios.post(`${API}/users/${user.id}/claim-daily-credit`);
+      toast.success("🎁 You got 1 free credit!");
+      setDailyClaimed(true);
+      refreshUser();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Already claimed today!");
+    }
+  };
+
+  // Toggle favorite
+  const toggleFavorite = async (generationId) => {
+    const isFav = favorites.some(f => f.id === generationId);
+    try {
+      if (isFav) {
+        await axios.delete(`${API}/users/${user.id}/favorites/${generationId}`);
+        setFavorites(favorites.filter(f => f.id !== generationId));
+        toast.success("Removed from favorites");
+      } else {
+        await axios.post(`${API}/users/${user.id}/favorites/${generationId}`);
+        const gen = history.find(h => h.id === generationId);
+        if (gen) setFavorites([...favorites, gen]);
+        toast.success("Added to favorites! ⭐");
+      }
+    } catch (e) {
+      toast.error("Failed to update favorites");
+    }
+  };
+
+  // Publish to gallery
+  const publishToGallery = async (generationId) => {
+    try {
+      await axios.post(`${API}/generations/${generationId}/publish?user_id=${user.id}`);
+      toast.success("Published to gallery! 🌟");
+      fetchData();
+    } catch (e) {
+      toast.error("Failed to publish");
+    }
+  };
+
+  // Load gallery
+  const loadGallery = async () => {
+    try {
+      const res = await axios.get(`${API}/gallery`);
+      setGallery(res.data);
+      setShowGallery(true);
+    } catch (e) {
+      toast.error("Failed to load gallery");
+    }
+  };
+
+  // SEO Analyzer
+  const analyzeSeo = async () => {
+    if (!seoContent.trim() || !seoKeyword.trim()) {
+      toast.error("Enter content and keyword");
+      return;
+    }
+    try {
+      const res = await axios.post(`${API}/analyze-seo?content=${encodeURIComponent(seoContent)}&keyword=${encodeURIComponent(seoKeyword)}&user_id=${user.id}`);
+      setSeoResult(res.data);
+    } catch (e) {
+      toast.error("Failed to analyze");
+    }
+  };
+
   const extractCode = (content) => {
     const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
     const matches = [...content.matchAll(codeBlockRegex)];
