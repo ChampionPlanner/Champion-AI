@@ -244,9 +244,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [profileTab, setProfileTab] = useState("info");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
-    try {
+    try
       const [typesRes, langsRes, templatesRes, historyRes, voicesRes, referralRes] = await Promise.all([
         axios.get(`${API}/content-types`),
         axios.get(`${API}/languages`),
