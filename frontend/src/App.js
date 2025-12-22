@@ -933,6 +933,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Referral Dialog */}
       <Dialog open={showReferral} onOpenChange={setShowReferral}>
         <DialogContent className="bg-slate-900 border-white/10">
+          <button 
+            onClick={() => setShowReferral(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl flex items-center gap-2">
               <Gift className="text-purple-400" /> Referral Program
