@@ -653,13 +653,21 @@ async def generate_image(request: ImageGenerateRequest):
     enhanced_prompt = f"{request.prompt}, {style_prompts.get(request.style, '')}"
     
     try:
-        image_result = await image_generation(
-            api_key=EMERGENT_LLM_KEY,
+        # Use OpenAIImageGeneration class
+        image_gen = OpenAIImageGeneration(api_key=EMERGENT_LLM_KEY)
+        image_bytes_list = await image_gen.generate_images(
             prompt=enhanced_prompt,
-            model="gpt-image-1",
-            size="1024x1024"
+            model="gpt-image-1"
         )
-        image_url = image_result if isinstance(image_result, str) else image_result.get('url', '')
+        
+        if not image_bytes_list or len(image_bytes_list) == 0:
+            raise Exception("No image generated")
+        
+        # Convert bytes to base64 data URL
+        image_bytes = image_bytes_list[0]
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        image_url = f"data:image/png;base64,{image_base64}"
+        
     except Exception as e:
         logging.error(f"Image generation error: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate image.")
