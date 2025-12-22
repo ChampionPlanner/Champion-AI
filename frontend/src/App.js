@@ -897,6 +897,12 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       {/* Pricing Dialog */}
       <Dialog open={showPricing} onOpenChange={setShowPricing}>
         <DialogContent className="bg-slate-900 border-white/10 max-w-4xl">
+          <button 
+            onClick={() => setShowPricing(false)}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Purchase Credits</DialogTitle>
             <DialogDescription className="text-gray-400">Secure payment via PayPal</DialogDescription>
