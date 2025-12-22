@@ -731,10 +731,10 @@ const Dashboard = ({ user, setUser, onLogout }) => {
               <Search className="h-4 w-4" /> <span className="hidden lg:inline ml-1">SEO</span>
             </TabsTrigger>
             <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
-              <Star className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">Saved</span>
+              <Star className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Saved</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-1 py-2">
-              <History className="h-4 w-4 sm:mr-1" /> <span className="hidden md:inline">History</span>
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
+              <History className="h-4 w-4" /> <span className="hidden lg:inline ml-1">History</span>
             </TabsTrigger>
           </TabsList>
 
