@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.openai import LlmChat, UserMessage
-from emergentintegrations.llm.openai import image_generation
+from emergentintegrations.llm.openai.image_generation import image_generation
 import secrets
 import io
 import json
