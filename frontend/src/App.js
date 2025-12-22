@@ -489,18 +489,18 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 flex-wrap">
-            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500">
-              <Sparkles className="h-4 w-4 mr-2" /> Generate
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 h-auto">
+            <TabsTrigger value="generate" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <Sparkles className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Generate</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500">
-              <Image className="h-4 w-4 mr-2" /> AI Image
+            <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <Image className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">AI Image</span>
             </TabsTrigger>
-            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500">
-              <RefreshCw className="h-4 w-4 mr-2" /> Repurpose
+            <TabsTrigger value="repurpose" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <RefreshCw className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Repurpose</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500">
-              <History className="h-4 w-4 mr-2" /> History
+            <TabsTrigger value="history" className="data-[state=active]:bg-purple-500 text-xs sm:text-sm px-2 py-2">
+              <History className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">History</span>
             </TabsTrigger>
           </TabsList>
 
@@ -571,7 +571,13 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-300">Brand Voice</Label>
-                      <Select value={selectedBrandVoice} onValueChange={setSelectedBrandVoice}>
+                      <Select value={selectedBrandVoice} onValueChange={(val) => {
+                        if (val === "add_new") {
+                          setShowBrandVoice(true);
+                        } else {
+                          setSelectedBrandVoice(val);
+                        }
+                      }}>
                         <SelectTrigger className="bg-white/5 border-white/10 text-white">
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
@@ -580,6 +586,11 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                           {brandVoices.map((voice) => (
                             <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
                           ))}
+                          <SelectItem value="add_new" className="text-purple-400">
+                            <span className="flex items-center gap-1">
+                              <Plus className="h-3 w-3" /> Add Brand Voice
+                            </span>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1150,21 +1161,29 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <DialogDescription className="text-gray-400">Save your brand's tone for consistent content</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            {brandVoices.map((voice) => (
-              <div key={voice.id} className="p-3 bg-white/5 rounded-lg flex justify-between items-center">
-                <div>
-                  <div className="text-white font-medium">{voice.name}</div>
-                  <div className="text-gray-400 text-sm">{voice.tone} • {voice.style}</div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={async () => {
-                  await axios.delete(`${API}/users/${user.id}/brand-voice/${voice.id}`);
-                  fetchData();
-                  toast.success("Deleted");
-                }}>
-                  <Trash2 className="h-4 w-4 text-red-400" />
-                </Button>
+            {brandVoices.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-2">No brand voices yet</p>
+                <p className="text-gray-500 text-sm">Create a brand voice to maintain consistent tone across all your content</p>
               </div>
-            ))}
+            ) : (
+              brandVoices.map((voice) => (
+                <div key={voice.id} className="p-3 bg-white/5 rounded-lg flex justify-between items-center">
+                  <div>
+                    <div className="text-white font-medium">{voice.name}</div>
+                    <div className="text-gray-400 text-sm">{voice.tone} • {voice.style}</div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={async () => {
+                    await axios.delete(`${API}/users/${user.id}/brand-voice/${voice.id}`);
+                    fetchData();
+                    toast.success("Deleted");
+                  }}>
+                    <Trash2 className="h-4 w-4 text-red-400" />
+                  </Button>
+                </div>
+              ))
+            )}
             <Button variant="outline" className="w-full" onClick={() => {
               const name = prompt("Brand voice name:");
               const tone = prompt("Tone (e.g., friendly, professional):");
