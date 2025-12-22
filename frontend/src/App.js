@@ -544,12 +544,16 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                       <Label className="text-gray-300">Language</Label>
                       <Select value={language} onValueChange={setLanguage}>
                         <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                          <SelectValue />
+                          <SelectValue placeholder="Select language">{languages[language] || "English"}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.entries(languages).map(([code, name]) => (
-                            <SelectItem key={code} value={code}>{name}</SelectItem>
-                          ))}
+                          {Object.keys(languages).length > 0 ? (
+                            Object.entries(languages).map(([code, name]) => (
+                              <SelectItem key={code} value={code}>{name}</SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="en">English</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
