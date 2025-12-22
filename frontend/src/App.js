@@ -228,6 +228,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [showBulk, setShowBulk] = useState(false);
   const [showRepurpose, setShowRepurpose] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [referralInfo, setReferralInfo] = useState(null);
   const [brandVoices, setBrandVoices] = useState([]);
   const [selectedBrandVoice, setSelectedBrandVoice] = useState("none");
@@ -239,6 +240,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageStyle, setImageStyle] = useState("realistic");
   const [activeTab, setActiveTab] = useState("generate");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [profileTab, setProfileTab] = useState("info");
 
   const fetchData = useCallback(async () => {
     try {
