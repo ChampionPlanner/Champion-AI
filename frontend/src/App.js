@@ -552,7 +552,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <MessageCircle className="h-12 w-12 mb-4 opacity-50" />
                       <p className="text-center">Start a conversation!</p>
-                      <p className="text-sm text-center mt-2 text-gray-600">Ask me anything - coding help, business advice, creative ideas...</p>
+                      <p className="text-sm text-center mt-2 text-gray-600">Science, math, history, coding, recipes, advice - I know it all!</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
