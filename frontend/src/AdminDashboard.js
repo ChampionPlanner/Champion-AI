@@ -72,55 +72,28 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API}/admin/logout?token=${encodeURIComponent(token)}`);
-    } catch (e) {
-      // Ignore logout errors
-    }
+  const handleLogout = () => {
     localStorage.removeItem('admin_token');
     setToken("");
     setIsLoggedIn(false);
     setData(null);
     setUsername("");
     setPassword("");
+    setError("");
   };
 
-  const fetchDashboard = async (authToken = token) => {
-    if (!authToken) {
-      setIsLoggedIn(false);
-      return;
-    }
-    setLoading(true);
+  const fetchDashboard = async () => {
+    if (!token) return;
     try {
-      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(authToken)}`);
+      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(token)}`);
       setData(res.data);
-      setError("");
     } catch (e) {
-      // Any error - clear token and show login
-      localStorage.removeItem('admin_token');
-      setToken("");
-      setIsLoggedIn(false);
-      setData(null);
       if (e.response?.status === 401) {
+        handleLogout();
         setError("Session expired. Please login again.");
-      } else {
-        setError("Connection error. Please login again.");
       }
-    } finally {
-      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isLoggedIn && token) {
-      fetchDashboard();
-    } else {
-      // No valid token, ensure we show login screen
-      setIsLoggedIn(false);
-      setLoading(false);
-    }
-  }, []);
 
   const handleAddCredits = async () => {
     if (!addCreditsUserId) return;
