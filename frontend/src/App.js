@@ -578,6 +578,79 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     }
   };
 
+  // Resume Builder
+  const generateResume = async () => {
+    if (!resumeData.name || !resumeData.email) {
+      toast.error("Name and email are required");
+      return;
+    }
+    setResumeGenerating(true);
+    try {
+      const res = await axios.post(`${API}/generate-resume`, {
+        user_id: user.id,
+        ...resumeData,
+        enhance_with_ai: true
+      });
+      setResumeHtml(res.data.html);
+      toast.success("Resume generated! 🎉");
+    } catch (e) {
+      toast.error("Failed to generate resume");
+    } finally {
+      setResumeGenerating(false);
+    }
+  };
+
+  const downloadResume = () => {
+    const blob = new Blob([resumeHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${resumeData.name.replace(/\s+/g, '_')}_Resume.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Resume downloaded!");
+  };
+
+  const addExperience = () => {
+    setResumeData({
+      ...resumeData,
+      experience: [...resumeData.experience, { company: "", title: "", start_date: "", end_date: "", description: "" }]
+    });
+  };
+
+  const addEducation = () => {
+    setResumeData({
+      ...resumeData,
+      education: [...resumeData.education, { school: "", degree: "", field: "", start_date: "", end_date: "" }]
+    });
+  };
+
+  const updateExperience = (index, field, value) => {
+    const newExp = [...resumeData.experience];
+    newExp[index][field] = value;
+    setResumeData({ ...resumeData, experience: newExp });
+  };
+
+  const updateEducation = (index, field, value) => {
+    const newEdu = [...resumeData.education];
+    newEdu[index][field] = value;
+    setResumeData({ ...resumeData, education: newEdu });
+  };
+
+  const removeExperience = (index) => {
+    setResumeData({
+      ...resumeData,
+      experience: resumeData.experience.filter((_, i) => i !== index)
+    });
+  };
+
+  const removeEducation = (index) => {
+    setResumeData({
+      ...resumeData,
+      education: resumeData.education.filter((_, i) => i !== index)
+    });
+  };
+
   const extractCode = (content) => {
     const codeBlockRegex = /```(?:jsx?|tsx?|react)?\s*([\s\S]*?)```/g;
     const matches = [...content.matchAll(codeBlockRegex)];
