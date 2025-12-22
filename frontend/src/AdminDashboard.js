@@ -189,6 +189,15 @@ export default function AdminDashboard() {
               {loading ? "Logging in..." : "Login to Admin Panel"}
             </button>
           </form>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm border border-white/10 rounded-lg"
+          >
+            🔄 Clear Cache & Reload
+          </button>
           <p className="text-gray-500 text-xs text-center mt-6">
             This area is restricted to administrators only
           </p>
