@@ -651,28 +651,7 @@ async def chat_with_ai(request: ChatRequest):
         role = "User" if msg.get("role") == "user" else "Assistant"
         messages_text += f"{role}: {msg.get('content', '')}\n"
     
-    prompt = f"""You are a helpful AI assistant for Champion AI Studio, a platform for AI content and web/app generation.
-Be helpful, friendly, and concise. You can help with:
-- General questions
-- Coding help
-- Business advice
-- Creative brainstorming
-- Writing assistance
-- And anything else the user needs!
-
-Previous conversation:
-{messages_text}
-
-User's current message: {request.message}
-
-Respond helpfully:"""
-
-    try:
-        llm_client = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=str(uuid.uuid4()),
-            system_message="You are a helpful, friendly AI assistant. Be concise but thorough."
-        )
+    prompt = f"""{messages_text}User: {request.message}
         llm_client = llm_client.with_model("openai", "gpt-4o-mini")
         
         user_msg = UserMessage(text=prompt)
