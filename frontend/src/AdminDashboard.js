@@ -143,6 +143,18 @@ export default function AdminDashboard() {
     a.click();
   };
 
+  // Show loading while checking token
+  if (loading && !isLoggedIn && !data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 text-purple-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
