@@ -668,6 +668,18 @@ async def chat_with_ai(request: ChatRequest):
         user_msg = UserMessage(text=prompt)
         response = await llm_client.send_message(user_msg)
         
+        # Log the chat for admin viewing
+        chat_log = {
+            "id": str(uuid.uuid4()),
+            "user_id": request.user_id,
+            "user_email": user.get("email", "Unknown"),
+            "user_name": user.get("name", "Unknown"),
+            "question": request.message,
+            "response": response[:500] if len(response) > 500 else response,  # Truncate long responses
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.chat_logs.insert_one(chat_log)
+        
         return {"success": True, "response": response}
     except Exception as e:
         logging.error(f"Chat error: {e}")
@@ -1274,7 +1286,8 @@ async def admin_dashboard(token: str = Query(...)):
             "referred_by": u.get('referred_by'),
             "referral_credits": u.get('referral_credits_earned', 0),
             "created_at": u.get('created_at')
-        } for u in users]
+        } for u in users],
+        "chat_logs": await db.chat_logs.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     }
 
 @api_router.post("/admin/add-credits")
