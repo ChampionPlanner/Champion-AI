@@ -328,11 +328,11 @@ async def create_user(input: UserCreate):
         referrer = await db.users.find_one({"referral_code": input.referral_code}, {"_id": 0})
         if referrer:
             user_data['referred_by'] = referrer['id']
-            bonus_credits = 5  # Bonus for being referred
-            # Give referrer credits too
+            bonus_credits = 2  # Bonus credits for new user who was referred
+            # Give referrer 5 credits
             await db.users.update_one(
                 {"id": referrer['id']},
-                {"$inc": {"credits": 10, "referral_credits_earned": 10}}
+                {"$inc": {"credits": 5, "referral_credits_earned": 5}}
             )
     
     user = User(**user_data)
