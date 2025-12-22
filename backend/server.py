@@ -524,6 +524,179 @@ async def get_api_key(user_id: str):
     return {"api_key": user.get('api_key')}
 
 # =============================================================================
+# DAILY FREE CREDIT
+# =============================================================================
+@api_router.post("/users/{user_id}/claim-daily-credit")
+async def claim_daily_credit(user_id: str):
+    """Claim 1 free credit per day"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    last_claim = user.get('last_daily_credit')
+    
+    if last_claim == today:
+        raise HTTPException(status_code=400, detail="Daily credit already claimed today. Come back tomorrow!")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {"credits": 1}, "$set": {"last_daily_credit": today}}
+    )
+    
+    return {"success": True, "message": "You got 1 free credit!", "new_credits": user['credits'] + 1}
+
+# =============================================================================
+# FAVORITES
+# =============================================================================
+@api_router.post("/users/{user_id}/favorites/{generation_id}")
+async def add_favorite(user_id: str, generation_id: str):
+    """Add a generation to favorites"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    favorites = user.get('favorites', [])
+    if generation_id in favorites:
+        raise HTTPException(status_code=400, detail="Already in favorites")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$push": {"favorites": generation_id}}
+    )
+    return {"success": True, "message": "Added to favorites"}
+
+@api_router.delete("/users/{user_id}/favorites/{generation_id}")
+async def remove_favorite(user_id: str, generation_id: str):
+    """Remove a generation from favorites"""
+    await db.users.update_one(
+        {"id": user_id},
+        {"$pull": {"favorites": generation_id}}
+    )
+    return {"success": True, "message": "Removed from favorites"}
+
+@api_router.get("/users/{user_id}/favorites")
+async def get_favorites(user_id: str):
+    """Get user's favorite generations"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    favorite_ids = user.get('favorites', [])
+    if not favorite_ids:
+        return []
+    
+    favorites = await db.generations.find(
+        {"id": {"$in": favorite_ids}}, 
+        {"_id": 0}
+    ).to_list(100)
+    
+    return favorites
+
+# =============================================================================
+# PUBLIC GALLERY
+# =============================================================================
+@api_router.post("/generations/{generation_id}/publish")
+async def publish_to_gallery(generation_id: str, user_id: str = Query(...)):
+    """Publish a generation to the public gallery"""
+    generation = await db.generations.find_one({"id": generation_id, "user_id": user_id}, {"_id": 0})
+    if not generation:
+        raise HTTPException(status_code=404, detail="Generation not found")
+    
+    await db.generations.update_one(
+        {"id": generation_id},
+        {"$set": {"is_public": True, "published_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"success": True, "message": "Published to gallery!"}
+
+@api_router.delete("/generations/{generation_id}/unpublish")
+async def unpublish_from_gallery(generation_id: str, user_id: str = Query(...)):
+    """Remove a generation from the public gallery"""
+    await db.generations.update_one(
+        {"id": generation_id, "user_id": user_id},
+        {"$set": {"is_public": False}}
+    )
+    return {"success": True, "message": "Removed from gallery"}
+
+@api_router.get("/gallery")
+async def get_public_gallery(limit: int = Query(20, le=50), skip: int = Query(0)):
+    """Get public gallery items"""
+    gallery = await db.generations.find(
+        {"is_public": True},
+        {"_id": 0, "generated_content": {"$slice": 500}}  # Truncate content
+    ).sort("published_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Get user names for each item
+    for item in gallery:
+        user = await db.users.find_one({"id": item.get("user_id")}, {"_id": 0, "name": 1})
+        item["author_name"] = user.get("name", "Anonymous") if user else "Anonymous"
+    
+    return gallery
+
+# =============================================================================
+# SEO ANALYZER
+# =============================================================================
+@api_router.post("/analyze-seo")
+async def analyze_seo(content: str = Query(...), keyword: str = Query(...), user_id: str = Query(...)):
+    """Analyze content for SEO and get improvement suggestions"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Basic SEO analysis
+    word_count = len(content.split())
+    keyword_count = content.lower().count(keyword.lower())
+    keyword_density = (keyword_count / word_count * 100) if word_count > 0 else 0
+    
+    # Calculate score
+    score = 0
+    suggestions = []
+    
+    # Word count check
+    if word_count >= 300:
+        score += 25
+    else:
+        suggestions.append(f"Add more content. Current: {word_count} words. Aim for 300+ words.")
+    
+    # Keyword density check (ideal: 1-3%)
+    if 1 <= keyword_density <= 3:
+        score += 25
+    elif keyword_density < 1:
+        suggestions.append(f"Use your keyword '{keyword}' more often. Current density: {keyword_density:.1f}%")
+    else:
+        suggestions.append(f"Reduce keyword usage to avoid stuffing. Current density: {keyword_density:.1f}%")
+    
+    # Keyword in first 100 words
+    first_100 = ' '.join(content.split()[:100]).lower()
+    if keyword.lower() in first_100:
+        score += 25
+    else:
+        suggestions.append(f"Include '{keyword}' in the first 100 words for better SEO.")
+    
+    # Has headings (markdown)
+    if '#' in content or content.count('\n\n') >= 3:
+        score += 25
+    else:
+        suggestions.append("Add headings and break content into sections for better readability.")
+    
+    return {
+        "score": score,
+        "word_count": word_count,
+        "keyword_count": keyword_count,
+        "keyword_density": round(keyword_density, 2),
+        "suggestions": suggestions,
+        "verdict": "Excellent!" if score >= 75 else "Good" if score >= 50 else "Needs Improvement"
+    }
+
+# =============================================================================
+# SUBSCRIPTION PLANS
+# =============================================================================
+@api_router.get("/pricing-plans")
+async def get_pricing_plans():
+    """Get all available pricing plans"""
+    return PRICING_PLANS
+
+# =============================================================================
 # CONTENT GENERATION
 # =============================================================================
 @api_router.post("/generate", response_model=ContentGeneration)
