@@ -1563,11 +1563,11 @@ const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
         email, 
         name, 
         password,
-        referral_code: referralCode || null 
+        referral_code: referralCodeInput.trim() || null 
       });
       localStorage.setItem('champion_ai_user', JSON.stringify(res.data));
       onAuth(res.data);
-      toast.success(referralCode ? "Welcome! You got 5 bonus credits!" : "Welcome to Champion AI Studio!");
+      toast.success(referralCodeInput ? "Welcome! You got 2 bonus credits!" : "Welcome to Champion AI Studio!");
     } catch (e) {
       setError(e.response?.data?.detail || "Failed to create account");
     } finally {
