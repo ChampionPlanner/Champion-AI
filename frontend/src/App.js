@@ -1150,21 +1150,29 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             <DialogDescription className="text-gray-400">Save your brand's tone for consistent content</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            {brandVoices.map((voice) => (
-              <div key={voice.id} className="p-3 bg-white/5 rounded-lg flex justify-between items-center">
-                <div>
-                  <div className="text-white font-medium">{voice.name}</div>
-                  <div className="text-gray-400 text-sm">{voice.tone} • {voice.style}</div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={async () => {
-                  await axios.delete(`${API}/users/${user.id}/brand-voice/${voice.id}`);
-                  fetchData();
-                  toast.success("Deleted");
-                }}>
-                  <Trash2 className="h-4 w-4 text-red-400" />
-                </Button>
+            {brandVoices.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-2">No brand voices yet</p>
+                <p className="text-gray-500 text-sm">Create a brand voice to maintain consistent tone across all your content</p>
               </div>
-            ))}
+            ) : (
+              brandVoices.map((voice) => (
+                <div key={voice.id} className="p-3 bg-white/5 rounded-lg flex justify-between items-center">
+                  <div>
+                    <div className="text-white font-medium">{voice.name}</div>
+                    <div className="text-gray-400 text-sm">{voice.tone} • {voice.style}</div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={async () => {
+                    await axios.delete(`${API}/users/${user.id}/brand-voice/${voice.id}`);
+                    fetchData();
+                    toast.success("Deleted");
+                  }}>
+                    <Trash2 className="h-4 w-4 text-red-400" />
+                  </Button>
+                </div>
+              ))
+            )}
             <Button variant="outline" className="w-full" onClick={() => {
               const name = prompt("Brand voice name:");
               const tone = prompt("Tone (e.g., friendly, professional):");
