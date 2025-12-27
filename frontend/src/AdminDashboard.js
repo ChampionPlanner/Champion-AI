@@ -11,14 +11,39 @@ const API = `${BACKEND_URL}/api`;
 export default function AdminDashboard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState(() => localStorage.getItem('admin_token') || "");
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('admin_token'));
-  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [addCreditsUserId, setAddCreditsUserId] = useState("");
   const [addCreditsAmount, setAddCreditsAmount] = useState(10);
+
+  // On mount, check for existing token
+  useEffect(() => {
+    const savedToken = localStorage.getItem('admin_token');
+    if (savedToken) {
+      // Verify the token is still valid
+      verifyToken(savedToken);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const verifyToken = async (savedToken) => {
+    try {
+      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(savedToken)}`);
+      setToken(savedToken);
+      setIsLoggedIn(true);
+      setData(res.data);
+    } catch (e) {
+      // Token invalid - clear it
+      localStorage.removeItem('admin_token');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,70 +51,49 @@ export default function AdminDashboard() {
     setError("");
     try {
       const res = await axios.post(`${API}/admin/login`, {
-        username: username,
+        username: username.trim(),
         password: password
       });
       const newToken = res.data.token;
       setToken(newToken);
       localStorage.setItem('admin_token', newToken);
       setIsLoggedIn(true);
-      fetchDashboard(newToken);
+      
+      // Fetch dashboard data
+      const dashRes = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(newToken)}`);
+      setData(dashRes.data);
+      setError("");
     } catch (e) {
+      console.error("Login error:", e);
       setError(e.response?.data?.detail || "Invalid username or password");
+      setIsLoggedIn(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API}/admin/logout?token=${encodeURIComponent(token)}`);
-    } catch (e) {
-      // Ignore logout errors
-    }
+  const handleLogout = () => {
     localStorage.removeItem('admin_token');
     setToken("");
     setIsLoggedIn(false);
     setData(null);
     setUsername("");
     setPassword("");
+    setError("");
   };
 
-  const fetchDashboard = async (authToken = token) => {
-    if (!authToken) {
-      setIsLoggedIn(false);
-      return;
-    }
-    setLoading(true);
+  const fetchDashboard = async () => {
+    if (!token) return;
     try {
-      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(authToken)}`);
+      const res = await axios.get(`${API}/admin/dashboard?token=${encodeURIComponent(token)}`);
       setData(res.data);
-      setError("");
     } catch (e) {
-      // Any error - clear token and show login
-      localStorage.removeItem('admin_token');
-      setToken("");
-      setIsLoggedIn(false);
-      setData(null);
       if (e.response?.status === 401) {
+        handleLogout();
         setError("Session expired. Please login again.");
-      } else {
-        setError("Connection error. Please login again.");
       }
-    } finally {
-      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isLoggedIn && token) {
-      fetchDashboard();
-    } else {
-      // No valid token, ensure we show login screen
-      setIsLoggedIn(false);
-      setLoading(false);
-    }
-  }, []);
 
   const handleAddCredits = async () => {
     if (!addCreditsUserId) return;
@@ -139,6 +143,18 @@ export default function AdminDashboard() {
     a.click();
   };
 
+  // Show loading while checking token
+  if (loading && !isLoggedIn && !data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 text-purple-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -185,6 +201,15 @@ export default function AdminDashboard() {
               {loading ? "Logging in..." : "Login to Admin Panel"}
             </button>
           </form>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm border border-white/10 rounded-lg"
+          >
+            🔄 Clear Cache & Reload
+          </button>
           <p className="text-gray-500 text-xs text-center mt-6">
             This area is restricted to administrators only
           </p>
