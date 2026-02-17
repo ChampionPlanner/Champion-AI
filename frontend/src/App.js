@@ -728,7 +728,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-4 md:grid-cols-8 h-auto gap-1">
+          <TabsList className="bg-white/5 border border-white/10 w-full grid grid-cols-5 md:grid-cols-9 h-auto gap-1">
             <TabsTrigger value="chat" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
               <MessageCircle className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Ask AI</span>
             </TabsTrigger>
@@ -737,6 +737,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </TabsTrigger>
             <TabsTrigger value="image" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
               <Image className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Image</span>
+            </TabsTrigger>
+            <TabsTrigger value="video" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2" data-testid="video-tab">
+              <Video className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Video</span>
             </TabsTrigger>
             <TabsTrigger value="resume" className="data-[state=active]:bg-purple-500 text-xs px-1 py-2">
               <Briefcase className="h-4 w-4" /> <span className="hidden lg:inline ml-1">Resume</span>
