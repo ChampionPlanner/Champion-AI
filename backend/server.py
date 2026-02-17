@@ -290,6 +290,12 @@ class ImageGenerateRequest(BaseModel):
     prompt: str
     style: str = "realistic"  # realistic, illustration, 3d, artistic
 
+class VideoGenerateRequest(BaseModel):
+    user_id: str
+    prompt: str
+    size: str = "1280x720"  # 1280x720, 1792x1024, 1024x1792, 1024x1024
+    duration: int = 4  # 4, 8, or 12 seconds
+
 class PurchaseCreditsRequest(BaseModel):
     user_id: str
     plan: str
