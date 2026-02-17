@@ -772,9 +772,18 @@ async def publish_to_gallery(generation_id: str, user_id: str = Query(...)):
     if not generation:
         raise HTTPException(status_code=404, detail="Generation not found")
     
+    # Get user name for display
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "name": 1})
+    user_name = user.get("name", "Anonymous") if user else "Anonymous"
+    
     await db.generations.update_one(
         {"id": generation_id},
-        {"$set": {"is_public": True, "published_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {
+            "is_public": True, 
+            "published_at": datetime.now(timezone.utc).isoformat(),
+            "user_name": user_name,
+            "likes": generation.get("likes", 0)
+        }}
     )
     return {"success": True, "message": "Published to gallery!"}
 
@@ -787,18 +796,56 @@ async def unpublish_from_gallery(generation_id: str, user_id: str = Query(...)):
     )
     return {"success": True, "message": "Removed from gallery"}
 
+@api_router.post("/generations/{generation_id}/like")
+async def like_generation(generation_id: str):
+    """Like a public generation"""
+    generation = await db.generations.find_one({"id": generation_id, "is_public": True}, {"_id": 0})
+    if not generation:
+        raise HTTPException(status_code=404, detail="Generation not found or not public")
+    
+    await db.generations.update_one(
+        {"id": generation_id},
+        {"$inc": {"likes": 1}}
+    )
+    return {"success": True, "likes": generation.get("likes", 0) + 1}
+
 @api_router.get("/gallery")
-async def get_public_gallery(limit: int = Query(20, le=50), skip: int = Query(0)):
+async def get_public_gallery(
+    limit: int = Query(20, le=50), 
+    skip: int = Query(0),
+    content_type: Optional[str] = Query(None)  # Filter by type: video, image, etc.
+):
     """Get public gallery items"""
+    query = {"is_public": True}
+    if content_type:
+        query["content_type"] = content_type
+    
     gallery = await db.generations.find(
-        {"is_public": True},
+        query,
         {"_id": 0, "generated_content": {"$slice": 500}}  # Truncate content
     ).sort("published_at", -1).skip(skip).limit(limit).to_list(limit)
     
     # Get user names for each item
     for item in gallery:
-        user = await db.users.find_one({"id": item.get("user_id")}, {"_id": 0, "name": 1})
+        user = await db.users.find_one({"id": item.get("user_id")}, {"_id": 0, "name": 1, "picture": 1})
         item["author_name"] = user.get("name", "Anonymous") if user else "Anonymous"
+        item["author_picture"] = user.get("picture") if user else None
+    
+    return gallery
+
+@api_router.get("/gallery/videos")
+async def get_video_gallery(limit: int = Query(20, le=50), skip: int = Query(0)):
+    """Get public video gallery - featured videos"""
+    gallery = await db.generations.find(
+        {"is_public": True, "content_type": "video"},
+        {"_id": 0}
+    ).sort([("likes", -1), ("published_at", -1)]).skip(skip).limit(limit).to_list(limit)
+    
+    # Get user names for each item
+    for item in gallery:
+        user = await db.users.find_one({"id": item.get("user_id")}, {"_id": 0, "name": 1, "picture": 1})
+        item["author_name"] = user.get("name", "Anonymous") if user else "Anonymous"
+        item["author_picture"] = user.get("picture") if user else None
     
     return gallery
 
