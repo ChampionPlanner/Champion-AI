@@ -2626,7 +2626,12 @@ function App() {
     }
   }, [paymentStatus, user]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
     localStorage.removeItem('champion_ai_user');
     setUser(null);
     setShowLanding(true);
