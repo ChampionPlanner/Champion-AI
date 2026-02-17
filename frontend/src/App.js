@@ -257,6 +257,11 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [apiKey, setApiKey] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageStyle, setImageStyle] = useState("realistic");
+  const [videoPrompt, setVideoPrompt] = useState("");
+  const [videoSize, setVideoSize] = useState("1280x720");
+  const [videoDuration, setVideoDuration] = useState(4);
+  const [generatedVideo, setGeneratedVideo] = useState("");
+  const [videoGenerating, setVideoGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("generate");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
