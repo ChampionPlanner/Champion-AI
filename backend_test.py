@@ -247,6 +247,30 @@ class ChampionAITester:
         """Test getting public gallery"""
         return self.run_test("Public Gallery", "GET", "gallery", 200)
 
+    def test_video_gallery(self):
+        """Test getting video gallery"""
+        return self.run_test("Video Gallery", "GET", "gallery/videos", 200)
+
+    def test_gallery_with_content_type_filter(self):
+        """Test gallery with content_type filter"""
+        return self.run_test("Gallery with Video Filter", "GET", "gallery?content_type=video", 200)
+
+    def test_publish_generation_no_user(self):
+        """Test publishing generation without user_id"""
+        return self.run_test("Publish Generation (No User)", "POST", "generations/test-id/publish", 400)
+
+    def test_publish_generation_invalid_id(self):
+        """Test publishing generation with invalid ID"""
+        if not self.user_id:
+            self.log_test("Publish Generation (Invalid ID)", False, error="No user ID available")
+            return False, {}
+        
+        return self.run_test("Publish Generation (Invalid ID)", "POST", f"generations/invalid-id/publish?user_id={self.user_id}", 404)
+
+    def test_like_generation_invalid_id(self):
+        """Test liking generation with invalid ID"""
+        return self.run_test("Like Generation (Invalid ID)", "POST", "generations/invalid-id/like", 404)
+
     def test_google_oauth_session_invalid(self):
         """Test Google OAuth session endpoint with invalid session_id"""
         invalid_session_data = {
