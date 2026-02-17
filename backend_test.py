@@ -428,6 +428,15 @@ class ChampionAITester:
         self.test_auth_me_invalid_token()
         self.test_logout_endpoint()
 
+        # Sora 2 Video Generation tests
+        print("\n🎬 Testing Sora 2 Video Generation Features...")
+        self.test_video_content_type()
+        self.test_video_generation_no_user()
+        self.test_video_generation_invalid_size()
+        self.test_video_generation_invalid_duration()
+        self.test_video_generation_valid_sizes()
+        self.test_video_generation_valid_durations()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} tests passed")
