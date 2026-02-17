@@ -18,7 +18,7 @@ import {
   CreditCard, User, LogOut, CheckCircle, Loader2, ArrowRight, Star, Palette, Layers,
   Eye, Code, Image, RefreshCw, Globe, Users, Download, Key, Briefcase, Home, 
   ShoppingCart, Laptop, Dumbbell, Gift, Plus, Trash2, Languages, Lock, X, ArrowLeft,
-  MessageCircle, Send, Heart, ExternalLink, Twitter, Search, Crown, Calendar
+  MessageCircle, Send, Heart, ExternalLink, Twitter, Search, Crown, Calendar, Video
 } from "lucide-react";
 import { Sandpack } from "@codesandbox/sandpack-react";
 
