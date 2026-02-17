@@ -377,7 +377,9 @@ const Dashboard = ({ user, setUser, onLogout }) => {
   const [videoSize, setVideoSize] = useState("1280x720");
   const [videoDuration, setVideoDuration] = useState(4);
   const [generatedVideo, setGeneratedVideo] = useState("");
+  const [generatedVideoId, setGeneratedVideoId] = useState("");
   const [videoGenerating, setVideoGenerating] = useState(false);
+  const [videoPublished, setVideoPublished] = useState(false);
   const [activeTab, setActiveTab] = useState("generate");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
