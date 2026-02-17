@@ -104,6 +104,7 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { icon: Image, title: "AI Images", desc: "Custom graphics & visuals", highlight: true },
+              { icon: Video, title: "AI Videos", desc: "Generate videos with Sora 2", highlight: true, badge: "NEW" },
               { icon: Briefcase, title: "Resume Builder", desc: "AI-enhanced resumes", highlight: true, badge: "FREE" },
               { icon: MessageCircle, title: "Ask AI", desc: "ChatGPT-like assistant", highlight: true, badge: "FREE" },
               { icon: Search, title: "SEO Analyzer", desc: "Score your content", highlight: true },
@@ -113,14 +114,13 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
               { icon: Star, title: "Save Favorites", desc: "Star your best work" },
               { icon: Twitter, title: "Share to Social", desc: "One-click Twitter share" },
               { icon: FileText, title: "Blog Posts", desc: "SEO-optimized articles" },
-              { icon: Share2, title: "Social Media", desc: "Viral-worthy posts" },
               { icon: Layout, title: "Public Gallery", desc: "Showcase your creations" }
             ].map((feature, i) => (
               <Card key={i} className={`${feature.highlight ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/10'} hover:bg-white/10 transition-all`}>
                 <CardHeader className="p-4">
                   <div className="flex justify-between items-start">
                     <feature.icon className={`h-8 w-8 ${feature.highlight ? 'text-purple-300' : 'text-purple-400'} mb-2`} />
-                    {feature.badge && <Badge className="bg-green-500/20 text-green-400 text-xs">{feature.badge}</Badge>}
+                    {feature.badge && <Badge className={`${feature.badge === 'NEW' ? 'bg-pink-500/20 text-pink-400' : 'bg-green-500/20 text-green-400'} text-xs`}>{feature.badge}</Badge>}
                   </div>
                   <CardTitle className="text-white text-base">{feature.title}</CardTitle>
                   <CardDescription className="text-gray-400 text-sm">{feature.desc}</CardDescription>
