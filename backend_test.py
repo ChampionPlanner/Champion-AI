@@ -239,6 +239,27 @@ class ChampionAITester:
         """Test getting public gallery"""
         return self.run_test("Public Gallery", "GET", "gallery", 200)
 
+    def test_google_oauth_session_invalid(self):
+        """Test Google OAuth session endpoint with invalid session_id"""
+        invalid_session_data = {
+            "session_id": "invalid_session_id_12345"
+        }
+        
+        return self.run_test("Google OAuth Session (Invalid)", "POST", "auth/google/session", 401, invalid_session_data)
+
+    def test_auth_me_no_token(self):
+        """Test /auth/me endpoint without authentication token"""
+        return self.run_test("Auth Me (No Token)", "GET", "auth/me", 401)
+
+    def test_auth_me_invalid_token(self):
+        """Test /auth/me endpoint with invalid token"""
+        headers = {'Authorization': 'Bearer invalid_token_12345'}
+        return self.run_test("Auth Me (Invalid Token)", "GET", "auth/me", 401, headers=headers)
+
+    def test_logout_endpoint(self):
+        """Test logout endpoint"""
+        return self.run_test("Logout Endpoint", "POST", "auth/logout", 200)
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Champion AI Studio Backend Tests")
