@@ -397,6 +397,41 @@ const Dashboard = ({ user, setUser, onLogout }) => {
     }
   };
 
+  const handleGenerateVideo = async () => {
+    if (!videoPrompt.trim()) {
+      toast.error("Please enter a video description");
+      return;
+    }
+
+    if (user.credits < 5) {
+      toast.error("Insufficient credits! Video generation requires 5 credits.");
+      setShowPricing(true);
+      return;
+    }
+
+    setVideoGenerating(true);
+    setGeneratedVideo("");
+    toast.info("🎬 Generating video... This may take 2-5 minutes.");
+
+    try {
+      const res = await axios.post(`${API}/generate-video`, {
+        user_id: user.id,
+        prompt: videoPrompt,
+        size: videoSize,
+        duration: videoDuration
+      }, { timeout: 660000 }); // 11 minute timeout
+      
+      setGeneratedVideo(res.data.video_url);
+      toast.success("🎥 Video generated successfully!");
+      refreshUser();
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Video generation failed");
+    } finally {
+      setVideoGenerating(false);
+    }
+  };
+
   const handleBulkGenerate = async () => {
     const topics = bulkTopics.split("\n").filter(t => t.trim());
     if (topics.length === 0) {
