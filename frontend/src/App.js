@@ -1397,22 +1397,38 @@ const Dashboard = ({ user, setUser, onLogout }) => {
                     )}
                   </div>
                   {generatedVideo && (
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        className="flex-1" 
-                        onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = generatedVideo;
-                          link.download = 'champion_ai_video.mp4';
-                          link.click();
-                        }}
-                      >
-                        <Download className="h-4 w-4 mr-2" /> Download
-                      </Button>
-                      <Button variant="outline" className="flex-1" onClick={() => copyToClipboard(generatedVideo)}>
-                        <Copy className="h-4 w-4 mr-2" /> Copy URL
-                      </Button>
+                    <div className="space-y-3 mt-4">
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          className="flex-1" 
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = generatedVideo;
+                            link.download = 'champion_ai_video.mp4';
+                            link.click();
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-2" /> Download
+                        </Button>
+                        <Button variant="outline" className="flex-1" onClick={() => copyToClipboard(generatedVideo)}>
+                          <Copy className="h-4 w-4 mr-2" /> Copy URL
+                        </Button>
+                      </div>
+                      {!videoPublished ? (
+                        <Button 
+                          className="w-full bg-gradient-to-r from-pink-500 to-purple-500"
+                          onClick={handlePublishVideo}
+                          data-testid="publish-video-btn"
+                        >
+                          <Share2 className="h-4 w-4 mr-2" /> Share to Video Gallery
+                        </Button>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2 text-green-400 py-2">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>Published to Gallery!</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
