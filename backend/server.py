@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.openai import LlmChat, UserMessage
 from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
+from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
 import base64
 import secrets
 import io
@@ -19,6 +20,7 @@ import json
 import hashlib
 import requests
 import httpx
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
