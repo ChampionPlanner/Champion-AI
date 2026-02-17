@@ -297,6 +297,13 @@ class ChampionAITester:
         self.test_ai_chat()
         self.test_content_generation()
 
+        # Google OAuth tests
+        print("\n🔐 Testing Google OAuth Features...")
+        self.test_google_oauth_session_invalid()
+        self.test_auth_me_no_token()
+        self.test_auth_me_invalid_token()
+        self.test_logout_endpoint()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} tests passed")
