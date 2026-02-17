@@ -206,6 +206,8 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
     name: str
+    picture: Optional[str] = None  # Profile picture URL (from Google OAuth)
+    auth_provider: str = "email"  # "email" or "google"
     credits: int = 3
     plan: str = "free"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
