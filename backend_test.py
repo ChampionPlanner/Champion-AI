@@ -49,8 +49,13 @@ class ChampionAITester:
                 response = requests.delete(url, headers=headers, timeout=30)
 
             print(f"   Response Status: {response.status_code}")
+            self._last_status_code = response.status_code  # Store for validation tests
             
-            success = response.status_code == expected_status
+            # Handle None expected_status for validation tests
+            if expected_status is None:
+                success = True  # Let the calling method determine success
+            else:
+                success = response.status_code == expected_status
             
             try:
                 response_data = response.json()
@@ -59,8 +64,11 @@ class ChampionAITester:
                 response_data = response.text
                 print(f"   Response: {response_data[:200]}...")
 
-            if success:
+            if success and expected_status is not None:
                 self.log_test(name, True, f"Status: {response.status_code}")
+                return True, response_data if isinstance(response_data, dict) else {}
+            elif expected_status is None:
+                # For validation tests, return the response for further processing
                 return True, response_data if isinstance(response_data, dict) else {}
             else:
                 error_msg = f"Expected {expected_status}, got {response.status_code}"
