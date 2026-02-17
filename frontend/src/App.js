@@ -2565,12 +2565,44 @@ function App() {
 
   const [user, setUser] = useState(getInitialState);
   const [showLanding, setShowLanding] = useState(() => !getInitialState());
+  const [processingAuth, setProcessingAuth] = useState(false);
   
   // Get referral code, payment status, and admin route from URL
   const urlParams = new URLSearchParams(window.location.search);
   const referralCode = urlParams.get('ref');
   const paymentStatus = urlParams.get('payment');
   const isAdminRoute = window.location.pathname === '/admin' || window.location.hash === '#admin';
+
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+  // Handle Google OAuth callback - check for session_id in URL hash
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('session_id=')) {
+      const sessionId = hash.split('session_id=')[1]?.split('&')[0];
+      if (sessionId && !processingAuth) {
+        setProcessingAuth(true);
+        // Process the session
+        axios.post(`${API}/auth/google/session`, { session_id: sessionId }, { withCredentials: true })
+          .then(res => {
+            if (res.data.success && res.data.user) {
+              localStorage.setItem('champion_ai_user', JSON.stringify(res.data.user));
+              setUser(res.data.user);
+              setShowLanding(false);
+              toast.success("Welcome! Signed in with Google");
+            }
+          })
+          .catch(err => {
+            console.error("Google auth error:", err);
+            toast.error("Failed to sign in with Google");
+          })
+          .finally(() => {
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setProcessingAuth(false);
+          });
+      }
+    }
+  }, [processingAuth]);
 
   // Handle payment callbacks
   useEffect(() => {
