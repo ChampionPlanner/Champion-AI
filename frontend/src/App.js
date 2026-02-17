@@ -2193,6 +2193,12 @@ const AuthScreen = ({ onAuth, referralCode: initialReferralCode }) => {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+  const handleGoogleLogin = () => {
+    const redirectUrl = window.location.origin;
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
