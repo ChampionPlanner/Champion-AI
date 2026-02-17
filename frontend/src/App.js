@@ -27,7 +27,7 @@ const API = `${BACKEND_URL}/api`;
 
 const iconMap = {
   FileText, Share2, ShoppingBag, Mail, Megaphone, Layout, Palette, Layers, Image, RefreshCw,
-  Home, Dumbbell, Laptop, ShoppingCart, Briefcase
+  Home, Dumbbell, Laptop, ShoppingCart, Briefcase, Video
 };
 
 const toneOptions = [
