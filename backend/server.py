@@ -261,6 +261,9 @@ class ContentGeneration(BaseModel):
     credits_used: int
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     image_url: Optional[str] = None
+    is_public: bool = False  # For public gallery
+    likes: int = 0  # Like count for gallery
+    user_name: Optional[str] = None  # Creator name for gallery display
 
 class GenerateRequest(BaseModel):
     user_id: str
