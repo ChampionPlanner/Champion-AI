@@ -39,6 +39,110 @@ const toneOptions = [
   { value: "formal", label: "Formal" }
 ];
 
+// Video Gallery Component for Landing Page
+const VideoGallery = ({ onGetStarted }) => {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const res = await axios.get(`${API}/gallery/videos?limit=6`);
+        setVideos(res.data);
+      } catch (e) {
+        console.error("Failed to fetch video gallery:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVideos();
+  }, []);
+
+  const handleLike = async (videoId) => {
+    try {
+      await axios.post(`${API}/generations/${videoId}/like`);
+      setVideos(prev => prev.map(v => 
+        v.id === videoId ? { ...v, likes: (v.likes || 0) + 1 } : v
+      ));
+    } catch (e) {
+      console.error("Failed to like video:", e);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (videos.length === 0) {
+    return (
+      <Card className="bg-white/5 border-white/10 max-w-2xl mx-auto">
+        <CardContent className="text-center py-12">
+          <Video className="h-16 w-16 text-purple-400 mx-auto mb-4 opacity-50" />
+          <h3 className="text-xl font-bold text-white mb-2">Be the First to Share!</h3>
+          <p className="text-gray-400 mb-6">No videos in the gallery yet. Create and share yours to be featured here!</p>
+          <Button onClick={onGetStarted} className="bg-gradient-to-r from-purple-500 to-pink-500">
+            <Video className="h-4 w-4 mr-2" /> Create Your First Video
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      {videos.map((video) => (
+        <Card key={video.id} className="bg-white/5 border-white/10 overflow-hidden group hover:border-purple-500/50 transition-all">
+          <div className="aspect-video bg-black relative">
+            {video.image_url ? (
+              <video 
+                src={video.image_url} 
+                className="w-full h-full object-cover"
+                muted
+                loop
+                onMouseEnter={(e) => e.target.play()}
+                onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Video className="h-12 w-12 text-gray-600" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+              <p className="text-white text-sm line-clamp-2">{video.topic}</p>
+            </div>
+          </div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {video.author_picture ? (
+                  <img src={video.author_picture} alt="" className="w-6 h-6 rounded-full" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                    <User className="h-3 w-3 text-purple-400" />
+                  </div>
+                )}
+                <span className="text-gray-400 text-sm">{video.author_name || "Anonymous"}</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-400 hover:text-pink-400"
+                onClick={() => handleLike(video.id)}
+              >
+                <Heart className="h-4 w-4 mr-1" /> {video.likes || 0}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 // Landing Page Component
 const LandingPage = ({ onGetStarted, referralCode }) => {
   return (
