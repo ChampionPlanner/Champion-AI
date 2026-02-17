@@ -1162,6 +1162,131 @@ const Dashboard = ({ user, setUser, onLogout }) => {
             </div>
           </TabsContent>
 
+          {/* AI Video Tab */}
+          <TabsContent value="video" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Video className="h-5 w-5 text-purple-400" /> AI Video Generator
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">Sora 2</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Generate AI videos from text prompts (5 credits)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Describe your video</Label>
+                    <Textarea
+                      placeholder="A golden retriever puppy playing in autumn leaves, cinematic lighting, slow motion..."
+                      value={videoPrompt}
+                      onChange={(e) => setVideoPrompt(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[120px]"
+                      data-testid="video-prompt-input"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Video Size</Label>
+                      <Select value={videoSize} onValueChange={setVideoSize}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1280x720">HD Landscape (1280x720)</SelectItem>
+                          <SelectItem value="1792x1024">Widescreen (1792x1024)</SelectItem>
+                          <SelectItem value="1024x1792">Portrait (1024x1792)</SelectItem>
+                          <SelectItem value="1024x1024">Square (1024x1024)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Duration</Label>
+                      <Select value={String(videoDuration)} onValueChange={(v) => setVideoDuration(Number(v))}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4">4 seconds (fastest)</SelectItem>
+                          <SelectItem value="8">8 seconds</SelectItem>
+                          <SelectItem value="12">12 seconds</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                    <p className="text-yellow-400 text-sm flex items-center gap-2">
+                      <Loader2 className="h-4 w-4" />
+                      Video generation typically takes 2-5 minutes. Please be patient!
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
+                    onClick={handleGenerateVideo}
+                    disabled={videoGenerating}
+                    data-testid="generate-video-btn"
+                  >
+                    {videoGenerating ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating Video...</>
+                    ) : (
+                      <><Video className="h-4 w-4 mr-2" /> Generate Video (5 credits)</>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white">Generated Video</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="aspect-video rounded-lg bg-black/30 flex items-center justify-center overflow-hidden">
+                    {videoGenerating ? (
+                      <div className="text-center">
+                        <Loader2 className="h-12 w-12 text-purple-400 animate-spin mx-auto mb-4" />
+                        <p className="text-gray-400">Creating your video...</p>
+                        <p className="text-gray-500 text-sm mt-2">This may take 2-5 minutes</p>
+                      </div>
+                    ) : generatedVideo ? (
+                      <video 
+                        src={generatedVideo} 
+                        controls 
+                        autoPlay 
+                        loop
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-center text-gray-500">
+                        <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>Your video will appear here</p>
+                      </div>
+                    )}
+                  </div>
+                  {generatedVideo && (
+                    <div className="flex gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1" 
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = generatedVideo;
+                          link.download = 'champion_ai_video.mp4';
+                          link.click();
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" /> Download
+                      </Button>
+                      <Button variant="outline" className="flex-1" onClick={() => copyToClipboard(generatedVideo)}>
+                        <Copy className="h-4 w-4 mr-2" /> Copy URL
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Resume Builder Tab */}
           <TabsContent value="resume" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
