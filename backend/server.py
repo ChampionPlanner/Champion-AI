@@ -1285,6 +1285,87 @@ async def generate_image(request: ImageGenerateRequest):
     return {"success": True, "image_url": image_url, "generation_id": generation.id}
 
 # =============================================================================
+# VIDEO GENERATION (Sora 2)
+# =============================================================================
+@api_router.post("/generate-video")
+async def generate_video(request: VideoGenerateRequest):
+    """Generate AI video using Sora 2"""
+    user = await db.users.find_one({"id": request.user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    credits_needed = 5
+    if user['credits'] < credits_needed:
+        raise HTTPException(status_code=402, detail="Insufficient credits. Video generation requires 5 credits.")
+    
+    # Validate size
+    valid_sizes = ["1280x720", "1792x1024", "1024x1792", "1024x1024"]
+    if request.size not in valid_sizes:
+        raise HTTPException(status_code=400, detail=f"Invalid size. Must be one of: {', '.join(valid_sizes)}")
+    
+    # Validate duration
+    valid_durations = [4, 8, 12]
+    if request.duration not in valid_durations:
+        raise HTTPException(status_code=400, detail=f"Invalid duration. Must be one of: {', '.join(map(str, valid_durations))} seconds")
+    
+    try:
+        # Create new instance for each request
+        video_gen = OpenAIVideoGeneration(api_key=EMERGENT_LLM_KEY)
+        
+        # Generate video (this is synchronous, run in executor to not block)
+        loop = asyncio.get_event_loop()
+        video_bytes = await loop.run_in_executor(
+            None,
+            lambda: video_gen.text_to_video(
+                prompt=request.prompt,
+                model="sora-2",
+                size=request.size,
+                duration=request.duration,
+                max_wait_time=600
+            )
+        )
+        
+        if not video_bytes:
+            raise Exception("No video generated")
+        
+        # Convert bytes to base64 data URL
+        video_base64 = base64.b64encode(video_bytes).decode('utf-8')
+        video_url = f"data:video/mp4;base64,{video_base64}"
+        
+    except Exception as e:
+        logging.error(f"Video generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
+    
+    # Deduct credits
+    await db.users.update_one(
+        {"id": request.user_id},
+        {"$inc": {"credits": -credits_needed}}
+    )
+    
+    # Save generation
+    generation = ContentGeneration(
+        user_id=request.user_id,
+        content_type="video",
+        topic=request.prompt,
+        tone=f"{request.size}, {request.duration}s",
+        generated_content=f"Video generated: {request.prompt}",
+        credits_used=credits_needed,
+        image_url=video_url  # Reusing image_url field for video URL
+    )
+    
+    doc = generation.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.generations.insert_one(doc)
+    
+    return {
+        "success": True, 
+        "video_url": video_url, 
+        "generation_id": generation.id,
+        "duration": request.duration,
+        "size": request.size
+    }
+
+# =============================================================================
 # CONTENT REPURPOSING
 # =============================================================================
 @api_router.post("/repurpose")
