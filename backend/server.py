@@ -185,6 +185,12 @@ CONTENT_TYPES = {
         "credits": 2,
         "icon": "Image"
     },
+    "video": {
+        "name": "AI Video",
+        "description": "Generate AI videos with Sora 2",
+        "credits": 5,
+        "icon": "Video"
+    },
     "repurpose": {
         "name": "Content Repurpose",
         "description": "Turn 1 piece into 10+",
