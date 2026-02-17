@@ -14,34 +14,42 @@ The application codebase had been reset to a basic template. The full Champion A
 - Installed missing dependencies (@codesandbox/sandpack-react, sonner)
 - **Added Google OAuth login** (2026-02-17) via Emergent Auth integration
 - **Added Sora 2 Video Generation** (2026-02-17) - AI video generation from text prompts
+- **Added Public Video Gallery** (2026-02-17) - Community showcase with likes feature
 
 ## User Personas
 - Content Creators: Need AI-powered content generation
 - Developers: Use web design/code generation features  
 - Job Seekers: Use AI resume builder (free feature)
 - General Users: Use AI chat for Q&A (free feature)
-- Video Marketers: Use AI video generation (NEW)
+- Video Marketers: Use AI video generation
+- Community Members: Browse and like videos in gallery
 
 ## Core Requirements
 1. User Authentication (signup/login with password + Google OAuth)
 2. AI Content Generation (blog posts, social media, emails, ads)
 3. AI Image Generation (GPT Image 1)
-4. **AI Video Generation (Sora 2)** - NEW
-5. AI Code/Component Generation
-6. Resume Builder (free)
-7. AI Chat (free)
-8. SEO Analyzer
-9. Credit System with PayPal payments
-10. Referral System
-11. Multi-language support (20+ languages)
+4. AI Video Generation (Sora 2)
+5. Public Video Gallery with likes
+6. AI Code/Component Generation
+7. Resume Builder (free)
+8. AI Chat (free)
+9. SEO Analyzer
+10. Credit System with PayPal payments
+11. Referral System
+12. Multi-language support (20+ languages)
 
 ## What's Been Implemented
 - Full application restored and working (2026-02-17)
 - Login/Signup with password authentication ✅
 - Google OAuth login ✅
-- Dashboard with 9 tabs (Ask AI, Generate, Image, **Video**, Resume, Repurpose, SEO, Saved, History) ✅
+- Dashboard with 9 tabs (Ask AI, Generate, Image, Video, Resume, Repurpose, SEO, Saved, History) ✅
 - AI features powered by EMERGENT_LLM_KEY ✅
-- **Sora 2 Video Generation** ✅ (NEW - 5 credits per video)
+- Sora 2 Video Generation ✅ (5 credits per video)
+- **Public Video Gallery** ✅ (NEW)
+  - Landing page video gallery section
+  - "Share to Video Gallery" button after generation
+  - Like functionality
+  - Author profiles with pictures
 - PayPal payment integration ✅
 - Admin dashboard ✅
 
@@ -56,15 +64,24 @@ The application codebase had been reset to a basic template. The full Champion A
 ### Content Generation
 - POST /api/generate - Content generation
 - POST /api/generate-image - Image generation (GPT Image 1)
-- POST /api/generate-video - Video generation (Sora 2) - NEW
+- POST /api/generate-video - Video generation (Sora 2)
 - POST /api/chat - AI chat
 - POST /api/generate-resume - Resume builder
+
+### Gallery (NEW)
+- GET /api/gallery - Get public gallery (with optional content_type filter)
+- GET /api/gallery/videos - Get video gallery (sorted by likes)
+- POST /api/generations/{id}/publish - Publish to gallery
+- DELETE /api/generations/{id}/unpublish - Remove from gallery
+- POST /api/generations/{id}/like - Like a public generation
+
+### Other
 - GET /api/content-types, /api/languages, /api/templates, /api/pricing
 
 ## Video Generation Details
 - Model: Sora 2 (OpenAI)
 - Cost: 5 credits per video
-- Sizes: 1280x720 (HD Landscape), 1792x1024 (Widescreen), 1024x1792 (Portrait), 1024x1024 (Square)
+- Sizes: 1280x720, 1792x1024, 1024x1792, 1024x1024
 - Durations: 4, 8, or 12 seconds
 - Generation time: 2-5 minutes
 
@@ -86,11 +103,11 @@ P1 (Important):
 - Rate limiting for AI endpoints
 
 P2 (Nice to have):
-- Additional AI models
+- Video style presets
 - Team/organization features
 - Enhanced analytics
 
 ## Next Tasks
-- Monitor video generation usage and performance
-- Consider adding video style presets
-- Consider adding email service for password reset emails
+- Monitor video generation usage and gallery engagement
+- Consider adding video comments feature
+- Consider adding video categories/tags
