@@ -529,6 +529,8 @@ const Dashboard = ({ user, setUser, onLogout }) => {
 
     setVideoGenerating(true);
     setGeneratedVideo("");
+    setGeneratedVideoId("");
+    setVideoPublished(false);
     toast.info("🎬 Generating video... This may take 2-5 minutes.");
 
     try {
@@ -540,6 +542,7 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       }, { timeout: 660000 }); // 11 minute timeout
       
       setGeneratedVideo(res.data.video_url);
+      setGeneratedVideoId(res.data.generation_id);
       toast.success("🎥 Video generated successfully!");
       refreshUser();
       fetchData();
@@ -547,6 +550,18 @@ const Dashboard = ({ user, setUser, onLogout }) => {
       toast.error(e.response?.data?.detail || "Video generation failed");
     } finally {
       setVideoGenerating(false);
+    }
+  };
+
+  const handlePublishVideo = async () => {
+    if (!generatedVideoId) return;
+    
+    try {
+      await axios.post(`${API}/generations/${generatedVideoId}/publish?user_id=${user.id}`);
+      setVideoPublished(true);
+      toast.success("🎉 Video published to gallery!");
+    } catch (e) {
+      toast.error("Failed to publish video");
     }
   };
 
