@@ -422,6 +422,14 @@ class ChampionAITester:
         self.test_pricing()
         self.test_stats()
         self.test_gallery()
+        self.test_video_gallery()
+        self.test_gallery_with_content_type_filter()
+
+        # Gallery functionality tests
+        print("\n🎨 Testing Gallery Features...")
+        self.test_publish_generation_no_user()
+        self.test_publish_generation_invalid_id()
+        self.test_like_generation_invalid_id()
 
         # User authentication tests
         print("\n📝 Testing User Authentication...")
