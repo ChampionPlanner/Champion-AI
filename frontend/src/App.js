@@ -162,6 +162,18 @@ const LandingPage = ({ onGetStarted, referralCode }) => {
           </div>
         </div>
 
+        {/* Video Gallery Section */}
+        <div className="mt-32">
+          <div className="text-center mb-12">
+            <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30 mb-4">
+              <Video className="h-3 w-3 mr-1" /> Community Showcase
+            </Badge>
+            <h2 className="text-4xl font-bold text-white mb-4">AI Video Gallery</h2>
+            <p className="text-gray-400">See what our community is creating with Sora 2</p>
+          </div>
+          <VideoGallery onGetStarted={() => setShowAuth(true)} />
+        </div>
+
         {/* Pricing */}
         <div className="mt-32">
           <h2 className="text-4xl font-bold text-white text-center mb-4">Simple Pricing</h2>
